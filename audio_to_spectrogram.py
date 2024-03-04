@@ -33,9 +33,5 @@ def audio_to_spectrograms(audio_file, timestep):
         # Plot and save spectrogram
         plt.figure(figsize=(4, 2))
         librosa.display.specshow(spect[i], sr=sr, x_axis='time', y_axis='log')
-        # plt.colorbar(format='%+2.0f dB')
-        # plt.title('Spectrogram')
-        # plt.xlabel('Time (s)')
-        # plt.ylabel('Frequency (Hz)')
         plt.tight_layout()
     return spect

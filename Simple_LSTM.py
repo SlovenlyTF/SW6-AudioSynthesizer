@@ -12,6 +12,19 @@ from os.path import exists
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 
 
+# Explicitly specify GPU device
+import os
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'  # Index of the GPU to use
+
+# Limit GPU memory usage
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+	try:
+		tf.config.experimental.set_memory_growth(gpus[0], True)
+	except RuntimeError as e:
+		print(e)
+
+
 # Loading the data
 Input = wtta.audio_to_arrays("./Data/Jingle Bells 1 Mads Synced.wav", timestep=0.5)
 Input_Append = (wtta.audio_to_arrays("./Data/Jingle Bells 1 Toby Synced.wav", timestep=0.5))
