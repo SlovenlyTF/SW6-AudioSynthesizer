@@ -10,6 +10,7 @@ import librosa.display
 import numpy as np
 import soundfile as sf
 import scipy.signal as sig
+import musicalbeeps
 
 
 SEMITONES_IN_OCTAVE = 12
@@ -88,7 +89,12 @@ def get_corrected_pitches(audio, sr, correction_function):
 
 
 def generate_piano_sounds(notes, duration):
-    return 0
+    # Initialize the player
+    player = musicalbeeps.Player(volume=0.5, mute_output=False)
+
+    # Play notes
+    for note in notes:
+        player.play_note(note, duration)
 
 
 def main():
@@ -122,10 +128,11 @@ def main():
 
     print('Generating piano sounds...')
     piano_sound = generate_piano_sounds(notes, len(y)/sr)
-    
+    """
     print('Saving piano to file...')
     piano_filepath = filepath.parent / (filepath.stem + '_piano' + filepath.suffix)
     sf.write(str(piano_filepath), piano_sound, sr)
+    """
 
 
 if __name__=='__main__':
