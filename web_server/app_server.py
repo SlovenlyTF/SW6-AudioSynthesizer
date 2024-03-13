@@ -3,9 +3,9 @@ from scipy.io import wavfile
 import io
 app = Flask(__name__)
 
-@app.get('/test')
-def bla():
-    return 'test'
+@app.get('/')
+def index():
+    return 'Hello, EchoPond!'
 
 @app.post('/flip_audio')
 def post_flip_audio():
