@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
@@ -133,7 +135,9 @@ void startRecording() async {
 
 void stopRecording() async {
   await record.stop();
-  sendRecording();
+  //sendRecording();
+  downloadRecording();
+  print('fuck you');
 }
 
 void deleteRecording() async {
@@ -146,7 +150,7 @@ void sendRecording() async {
   String filePath = '${appDocumentsDirectory.path}/test.wav';
   Dio dio = Dio();
   dio.options.headers['Connection'] = 'Keep-Alive';
-  dio.options.connectTimeout = 30000;
+  dio.options.connectTimeout = Duration(seconds: 30);
   FormData formData = FormData.fromMap({
     'audio': await MultipartFile.fromFile(filePath, filename: 'test.wav'),
   });
@@ -156,5 +160,18 @@ void sendRecording() async {
   } catch (e) {
     print('Error: $e');
   }
-  
+}
+
+Future<Response> downloadRecording() async {
+  var url = Uri.http('10.0.2.2:5000', 'host_audio');
+  Directory appDocumentsDirectory = await getApplicationDocumentsDirectory();
+  String filePath = '${appDocumentsDirectory.path}/audio.wav';
+  Dio dio = Dio();
+  dio.options.headers['Connection'] = 'Keep-Alive';
+  //dio.options.responseType = ResponseType.bytes;
+  dio.options.connectTimeout = Duration(seconds: 30);
+  dio.interceptors.add(LogInterceptor(responseBody: true, logPrint: (o) => debugPrint(o.toString())));
+  var response = await dio.download(url.toString(), filePath);
+  print('HELLLLOOOOOO: ' + response.data.toString());
+  return response;
 }
