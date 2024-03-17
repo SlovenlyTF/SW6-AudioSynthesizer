@@ -43,6 +43,7 @@ class VAE:
     self._shape_before_bottleneck = None
     self._model_input = None
 
+    self.loss_weight = 1000
     self.num_conv_layers = len(conv_filters)
 
     self._build()
@@ -91,7 +92,7 @@ class VAE:
     """
     reconstruction_loss = self._calculate_reconstruction_loss(y_true, y_pred)
     kl_loss = self._calculate_kl_loss(y_true, y_pred)
-    total_loss = K.mean(reconstruction_loss + kl_loss)
+    total_loss = self.loss_weight * reconstruction_loss + kl_loss
     return total_loss
   
 
@@ -100,8 +101,8 @@ class VAE:
     Compile the autoencoder
     """
     optimizer = Adam(learning_rate)
-    mse_loss = MeanSquaredError()
-    self.autoencoder.compile(optimizer=optimizer, loss=mse_loss)
+    # mse_loss = MeanSquaredError()
+    self.autoencoder.compile(optimizer=optimizer, loss=self._calculate_total_loss, metrics=[self._calculate_kl_loss, self._calculate_reconstruction_loss])
 
 
   def train(self, x_train, y_train, batch_size, num_epochs):
@@ -174,21 +175,21 @@ class VAE:
     """
     Flatten data and add bottleneck with Gaussian sampling (Dense layers)
     """
+    def _sampling(args):
+      """
+      Sample from the latent space
+      """
+      mu, log_var = args
+      epsilon = K.random_normal(shape=K.shape(mu), mean=0., stddev=1.)
+      return mu + K.exp(log_var / 2) * epsilon
+
     self._shape_before_bottleneck = K.int_shape(MLgraph)[1:]
     MLgraph = Flatten(name='encoder_flatten')(MLgraph)
     self.mu = Dense(self.latent_space_dim, name='mu')(MLgraph)
     self.log_var = Dense(self.latent_space_dim, name='log_var')(MLgraph)
-    MLgraph = Lambda(self._sampling, name='encoder_output')([self.mu, self.log_var])
+    MLgraph = Lambda(_sampling, name='encoder_output')([self.mu, self.log_var])
+    # MLgraph = Lambda(_sampling, output_shape=, name='encoder_output')([self.mu, self.log_var])
     return MLgraph
-  
-
-  def _sampling(self, args):
-    """
-    Sample from the latent space
-    """
-    mu, log_var = args
-    epsilon = K.random_normal(shape=K.shape(self.mu), mean=0., stddev=1.)
-    return mu + K.exp(log_var / 2) * epsilon
 
 
   ### Decoder
@@ -208,7 +209,7 @@ class VAE:
     """
     Create decoder input layer
     """
-    return Input(shape=self.latent_space_dim, name='decoder_input')
+    return Input(shape=(self.latent_space_dim,), name='decoder_input')
 
 
   def _add_dense_layer(self, decoder_input):
