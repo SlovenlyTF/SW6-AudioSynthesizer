@@ -158,8 +158,8 @@ class PreprocesingPipeline:
   
 
   def _do_padding(self, signal):
-    if len(signal) < self.expected_sample_length:
-      num_missing_items = self.expected_sample_length - len(signal)
+    if len(signal) < self._expected_sample_length:
+      num_missing_items = self._expected_sample_length - len(signal)
       signal = self.padder.right_pad(signal, num_missing_items)
     return signal
   

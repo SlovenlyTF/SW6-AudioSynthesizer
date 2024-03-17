@@ -11,6 +11,7 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import MeanSquaredError
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 import tensorflow as tf
+import math
 
 tf.compat.v1.disable_eager_execution()
 
@@ -43,7 +44,7 @@ class VAE:
     self._shape_before_bottleneck = None
     self._model_input = None
 
-    self.loss_weight = 1000
+    self.loss_weight = 1000000
     self.num_conv_layers = len(conv_filters)
 
     self._build()
@@ -82,6 +83,7 @@ class VAE:
     y_true and y_pred are not used, 
     but are required for Keras to use this loss function
     """
+    print(f"log_var: {self.log_var}")
     kl_loss = -0.5 * K.sum(1 + self.log_var - K.exp(self.log_var) - K.square(self.mu), axis=1)
     return kl_loss
   
@@ -110,18 +112,36 @@ class VAE:
     Train the autoencoder
     """
 
-    early_stopper = EarlyStopping(monitor='accuracy', min_delta=0.1, patience=3)
-    reduce_lr = ReduceLROnPlateau(monitor='loss', patience=2, cooldown=0)
+    # Create an iterator for your dataset
+    dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 
-    callbacks = [reduce_lr, early_stopper]
+    # Define any transformations or preprocessing steps
+    dataset = dataset.batch(batch_size)  # Example: Batch the dataset
 
-    self.autoencoder.fit(
-      x_train, y_train,
-      batch_size=batch_size,
-      epochs=num_epochs,
-      shuffle=True,
-      callable=callbacks
-    )
+    # Create an iterator for your dataset
+    iterator = tf.compat.v1.data.make_one_shot_iterator(dataset)
+    data = iterator.get_next()
+
+    # Start a TensorFlow session
+    with tf.compat.v1.Session() as sess:
+      # Initialize global variables
+      sess.run(tf.compat.v1.global_variables_initializer())
+
+      # Train your model
+      for epoch in range(num_epochs):
+        print(f'Epoch {epoch + 1}/{num_epochs}')
+        for batch in range(batch_size):
+          x_batch, y_batch = sess.run(data)  # Fetch data from the iterator
+          self.autoencoder.train_on_batch(x_batch, y_batch)
+
+
+    # self.autoencoder.fit(
+    #   x_train, y_train,
+    #   batch_size=batch_size,
+    #   epochs=num_epochs,
+    #   shuffle=True,
+    #   callbacks=callbacks
+    # )
 
   ### Encoder
   def _build_encoder(self):
@@ -175,6 +195,12 @@ class VAE:
     """
     Flatten data and add bottleneck with Gaussian sampling (Dense layers)
     """
+
+    self._shape_before_bottleneck = K.int_shape(MLgraph)[1:]
+    MLgraph = Flatten(name='encoder_flatten')(MLgraph)
+    self.mu = Dense(self.latent_space_dim, name='mu')(MLgraph)
+    self.log_var = Dense(self.latent_space_dim, name='log_var')(MLgraph)
+
     def _sampling(args):
       """
       Sample from the latent space
@@ -183,12 +209,7 @@ class VAE:
       epsilon = K.random_normal(shape=K.shape(mu), mean=0., stddev=1.)
       return mu + K.exp(log_var / 2) * epsilon
 
-    self._shape_before_bottleneck = K.int_shape(MLgraph)[1:]
-    MLgraph = Flatten(name='encoder_flatten')(MLgraph)
-    self.mu = Dense(self.latent_space_dim, name='mu')(MLgraph)
-    self.log_var = Dense(self.latent_space_dim, name='log_var')(MLgraph)
     MLgraph = Lambda(_sampling, name='encoder_output')([self.mu, self.log_var])
-    # MLgraph = Lambda(_sampling, output_shape=, name='encoder_output')([self.mu, self.log_var])
     return MLgraph
 
 
