@@ -5,7 +5,7 @@ import math
 
 
 class AudioProcessor:
-  def __init__(self, sample_rate=22050, n_fft=2048, hop_length=512, n_mels=128, duration=2.97, mono=True, mode="constant"):
+  def __init__(self, sample_rate=22050, n_fft=2048, hop_length=512, n_mels=128, duration=2.97, mono=True, mode="constant", normalize_min=0, normalize_max=1):
     self.sample_rate = sample_rate
     self.n_fft = n_fft
     self.hop_length = hop_length
@@ -13,18 +13,18 @@ class AudioProcessor:
     self.duration = duration
     self.mono = mono
     self.mode = mode
+    self.normalize_min = normalize_min
+    self.normalize_max = normalize_max
 
 
-  def normalizer(self, signal, min_val=0, max_val=1):
-    min = min_val
-    max = max_val
+  def normalizer(self, signal):
     normalized_signal = (signal - signal.min()) / (signal.max() - signal.min())
-    normalized_signal = normalized_signal * (max - min) + min
+    normalized_signal = normalized_signal * (self.normalize_max - self.normalize_min) + self.normalize_min
     return normalized_signal
   
 
   def denormalize(self, normalized_signal, original_signal_max=40, original_signal_min=-40):
-    denormalized_signal = (normalized_signal - self.min) / (self.max - self.min)
+    denormalized_signal = (normalized_signal - self.normalize_min) / (self.normalize_max - self.normalize_min)
     denormalized_signal = normalized_signal * (original_signal_max - original_signal_min) + original_signal_min
     return denormalized_signal
 

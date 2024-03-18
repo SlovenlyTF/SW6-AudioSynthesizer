@@ -70,7 +70,7 @@ class LogSpectrogram:
     spectrogram = np.abs(stft)
     log_spectrogram = librosa.amplitude_to_db(spectrogram)
     return log_spectrogram
-    
+
 
 class Saver:
   """

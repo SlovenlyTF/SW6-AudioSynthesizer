@@ -112,36 +112,42 @@ class VAE:
     Train the autoencoder
     """
 
-    # Create an iterator for your dataset
-    dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+    # Define the callbacks
+    early_stopper = EarlyStopping(monitor='loss', min_delta=10, patience=3)
 
-    # Define any transformations or preprocessing steps
-    dataset = dataset.batch(batch_size)  # Example: Batch the dataset
+    callbacks = [early_stopper]
 
-    # Create an iterator for your dataset
-    iterator = tf.compat.v1.data.make_one_shot_iterator(dataset)
-    data = iterator.get_next()
+    # # Create an iterator for your dataset
+    # dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 
-    # Start a TensorFlow session
-    with tf.compat.v1.Session() as sess:
-      # Initialize global variables
-      sess.run(tf.compat.v1.global_variables_initializer())
+    # # Define any transformations or preprocessing steps
+    # dataset = dataset.batch(batch_size)  # Example: Batch the dataset
 
-      # Train your model
-      for epoch in range(num_epochs):
-        print(f'Epoch {epoch + 1}/{num_epochs}')
-        for batch in range(batch_size):
-          x_batch, y_batch = sess.run(data)  # Fetch data from the iterator
-          self.autoencoder.train_on_batch(x_batch, y_batch)
+    # # Create an iterator for your dataset
+    # iterator = tf.compat.v1.data.make_one_shot_iterator(dataset)
+    # data = iterator.get_next()
+
+    # # Start a TensorFlow session
+    # with tf.compat.v1.Session() as sess:
+    #   # Initialize global variables
+    #   sess.run(tf.compat.v1.global_variables_initializer())
+
+    #   # Train your model
+    #   for epoch in range(num_epochs):
+    #     print(f'Epoch {epoch + 1}/{num_epochs}')
+    #     for batch in range(batch_size):
+    #       print(f'Batch {batch + 1}/{batch_size}')
+    #       x_batch, y_batch = sess.run(data)  # Fetch data from the iterator
+    #       self.autoencoder.train_on_batch(x_batch, y_batch)
 
 
-    # self.autoencoder.fit(
-    #   x_train, y_train,
-    #   batch_size=batch_size,
-    #   epochs=num_epochs,
-    #   shuffle=True,
-    #   callbacks=callbacks
-    # )
+    self.autoencoder.fit(
+      x_train, y_train,
+      batch_size=batch_size,
+      epochs=num_epochs,
+      shuffle=True,
+      callbacks=callbacks
+    )
 
   ### Encoder
   def _build_encoder(self):
@@ -352,7 +358,7 @@ class VAE:
     """
     with open(os.path.join(path, 'parameters.pkl'), 'rb') as f:
       parameters = pickle.load(f)
-    autoencoder = VAE(*parameters)
+    autoencoder = VAE(**parameters)
     autoencoder.autoencoder.load_weights(os.path.join(path, 'weights.h5'))
     return autoencoder
 

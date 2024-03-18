@@ -37,14 +37,19 @@ test_data = test_data[..., np.newaxis]
 print(f"Train Data shape: {train_data.shape}")
 print(f"Test Data shape: {test_data.shape}")
 
+should_train = False
 
+if should_train:
+  # Train the model
+  autoencoder.train(train_data, train_data, num_epochs=10, batch_size=8)
+  autoencoder.save("./model")
+else:
+  autoencoder = autoencoder.load("./model")
 
-# Train the model
-autoencoder.train(train_data, train_data, num_epochs=10, batch_size=2)
-
+predict_data = test_data[0][None, ...]
 
 # Predict the model
-predictions = autoencoder.predict(train_data[0])
+predictions = autoencoder.reconstruct(predict_data)
 
 
 # Denormalize the data
