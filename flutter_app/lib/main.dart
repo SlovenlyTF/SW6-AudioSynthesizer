@@ -6,11 +6,22 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 final record = AudioRecorder();
 
 void main() {
   runApp(const MyApp());
+}
+
+enum OperationLabel {
+  flipAudio('Flip Audio', 'flip-audio'),
+  toSine('To Sine', 'to-sine');
+
+  const OperationLabel(this.label, this.endpoint);
+  final String label;
+  final String endpoint;
 }
 
 class MyApp extends StatelessWidget {
@@ -64,10 +75,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   bool isRecording = false;
 
-  @override Widget build(BuildContext context) {
+  final TextEditingController operationController = TextEditingController();
+  OperationLabel? selectedOperation;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -80,42 +94,65 @@ class _MyHomePageState extends State<MyHomePage> {
             flex: 1,
             child: Container(
               child: Center(
-                child: TextButton.icon(
-                  onPressed: () {
-                    isRecording ? stopRecording() : startRecording();
-                    setState(() {
-                      isRecording = !isRecording;
-                    });
-                  }, 
-                  icon: Icon(Icons.mic),
-                  label: Text('Record'),
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                      isRecording ? Colors.red : Colors.blue,
-                    ),
+                  child: TextButton.icon(
+                onPressed: () {
+                  isRecording
+                      ? stopRecording(selectedOperation)
+                      : startRecording();
+                  setState(() {
+                    isRecording = !isRecording;
+                  });
+                },
+                icon: Icon(Icons.mic),
+                label: Text('Record'),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                    isRecording ? Colors.red : Colors.blue,
                   ),
-                )
-              ),
+                ),
+              )),
             ),
           ),
-          const Divider( // Horizontal divider
+          // Audio operation dropdown
+          DropdownMenu<OperationLabel>(
+            initialSelection: OperationLabel.flipAudio,
+            controller: operationController,
+            // requestFocusOnTap is enabled/disabled by platforms when it is null.
+            // On mobile platforms, this is false by default. Setting this to true will
+            // trigger focus request on the text field and virtual keyboard will appear
+            // afterward. On desktop platforms however, this defaults to true.
+            requestFocusOnTap: true,
+            label: const Text('Operation'),
+            onSelected: (OperationLabel? operation) {
+              setState(() {
+                selectedOperation = operation;
+              });
+            },
+            dropdownMenuEntries: OperationLabel.values
+                .map<DropdownMenuEntry<OperationLabel>>(
+                    (OperationLabel operation) {
+              return DropdownMenuEntry<OperationLabel>(
+                value: operation,
+                label: operation.label,
+              );
+            }).toList(),
+          ),
+          const Divider(
+            // Horizontal divider
             thickness: 5,
             color: Colors.black,
           ),
           // Second half of the screen
           Expanded(
             flex: 1,
-            child: Container(
-              child: Center(
+            child: Center(
                 child: TextButton.icon(
-                  onPressed: () {
-                    stopRecording();
-                  }, 
-                  icon: Icon(Icons.play_arrow),
-                  label: Text('Play'),
-                )
-              ),
-            ),
+              onPressed: () {
+                playRecording();
+              },
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Play'),
+            )),
           ),
         ],
       ),
@@ -123,55 +160,118 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-void startRecording() async {  
+void startRecording() async {
   // Check and request permission if needed
   if (await record.hasPermission()) {
     // Start recording to file
     Directory appDocumentsDirectory = await getApplicationDocumentsDirectory();
     String filePath = '${appDocumentsDirectory.path}/test.wav';
-    await record.start(const RecordConfig(encoder: AudioEncoder.wav), path: filePath);
+    await record.start(const RecordConfig(encoder: AudioEncoder.wav),
+        path: filePath);
   }
 }
 
-void stopRecording() async {
+void showDebugToast(String message, [Color? color]) {
+  Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.CENTER,
+      timeInSecForIosWeb: 1,
+      backgroundColor: color ?? Colors.blue,
+      textColor: Colors.white,
+      fontSize: 16.0);
+}
+
+void stopRecording(OperationLabel? operation) async {
   await record.stop();
   //sendRecording();
-  downloadRecording();
-  print('fuck you');
+
+  showDebugToast('Stopped recording, sending to server');
+
+  String resultUri = await sendRecording(operation ?? OperationLabel.flipAudio);
+
+  if(resultUri.isEmpty) {
+    showDebugToast('Failed to receive response from server', Colors.red);
+  } else {
+    showDebugToast('Received response from server, downloading audio');
+
+    try {
+      // TODO: Verify received URI before downloading
+      bool downloadSuccessful = await downloadRecording(resultUri);
+      if(downloadSuccessful) {
+        showDebugToast('Audio successfully downloaded!');
+      } else {
+        showDebugToast('Failed to download audio from server', Colors.red);
+      }
+    } catch (error) {
+      showDebugToast('Failed to download audio from server', Colors.red);
+    }
+  }
 }
 
 void deleteRecording() async {
   record.dispose();
 }
 
-void sendRecording() async {
-  var url = Uri.http('10.0.2.2:5000', 'flip_audio');
+Future<String> sendRecording(OperationLabel operation) async {
+  // Define paths
+  var url = Uri.http('192.168.166.156:5000', 'api/${operation.endpoint}');
   Directory appDocumentsDirectory = await getApplicationDocumentsDirectory();
   String filePath = '${appDocumentsDirectory.path}/test.wav';
+
+  // Prepare request
   Dio dio = Dio();
   dio.options.headers['Connection'] = 'Keep-Alive';
-  dio.options.connectTimeout = Duration(seconds: 30);
+  dio.options.contentType = 'multipart/form-data';
+  dio.options.connectTimeout = const Duration(seconds: 30);
   FormData formData = FormData.fromMap({
     'audio': await MultipartFile.fromFile(filePath, filename: 'test.wav'),
   });
+
+  // Send request
+  Response response;
   try {
-    var response = await dio.post(url.toString(), data: formData);
-    print(response.statusCode);
-  } catch (e) {
-    print('Error: $e');
+    response = await dio.post(url.toString(), data: formData);
+  } catch (error) {
+    print('Error: $error');
+    return '';
   }
+
+  // TODO: Handle jsend style status and error messages when talking with server
+  if (response.statusCode != 200) {
+    print('Sound synthesis failed with status: ${response.statusCode}');
+    return '';
+  }
+
+  return response.data['data']['resultUrl'];
 }
 
-Future<Response> downloadRecording() async {
-  var url = Uri.http('10.0.2.2:5000', 'host_audio');
+Future<bool> downloadRecording(String url) async {
+  // Define local file path
   Directory appDocumentsDirectory = await getApplicationDocumentsDirectory();
   String filePath = '${appDocumentsDirectory.path}/audio.wav';
+
+  // Prepare request
   Dio dio = Dio();
   dio.options.headers['Connection'] = 'Keep-Alive';
-  //dio.options.responseType = ResponseType.bytes;
-  dio.options.connectTimeout = Duration(seconds: 30);
-  dio.interceptors.add(LogInterceptor(responseBody: true, logPrint: (o) => debugPrint(o.toString())));
-  var response = await dio.download(url.toString(), filePath);
-  print('HELLLLOOOOOO: ' + response.data.toString());
-  return response;
+  dio.options.connectTimeout = const Duration(seconds: 30);
+
+  // Send request
+  var response = await dio.download(url, filePath);
+  
+  return response.statusCode == 200;
+}
+
+void playRecording() async {
+  // Define local file path
+  Directory appDocumentsDirectory = await getApplicationDocumentsDirectory();
+  String filePath = '${appDocumentsDirectory.path}/audio.wav';
+
+  AudioPlayer player = AudioPlayer();
+  try {
+    player.play(DeviceFileSource(filePath));
+  } catch (error) {
+    print('Error: $error');
+    showDebugToast('Failed to find audio file', Colors.red);
+  }
 }
