@@ -1,58 +1,44 @@
 from Autoencoder import VAE
 import numpy as np
+from AudioProcessor import AudioProcessor
 
-LEARNING_RATE = 0.0005
-BATCH_SIZE = 32
-EPOCHS = 10
+class TrainModel:
+  def __init__(self):
+    self.processor = AudioProcessor()
 
-
-def load_data():
-  x = np.load('x.npy')
-  y = np.load('y.npy')
-  return x, y
-
-
-def split_data(x, y):
-  num_samples = len(x)
-  num_train_samples = int(num_samples * 0.8)
-  x_train = x[:num_train_samples]
-  y_train = y[:num_train_samples]
-  x_test = x[num_train_samples:]
-  y_test = y[num_train_samples:]
-  return x_train, y_train, x_test, y_test
+  def load_data(self, data_file_path, label_file_path):
+    data = self.processor.create_spectrogram_from_dir(data_file_path)
+    data = np.array(data)
+    labels = self.processor.create_spectrogram_from_dir(label_file_path)
+    labels = np.array(labels)
+    return data, labels
 
 
-def load_model(autoencoder = None):
-  autoencoder = VAE(
-      spectrogram_dim=(128, 128, 1),
-      conv_filters=(32, 64, 64, 64),
-      conv_kernels=(3, 3, 3, 3),
-      conv_strides=(1, 2, 2, 1),
-      latent_space_dim=128
-  )
-  autoencoder.summary()
-  autoencoder.compile(LEARNING_RATE)
-  return autoencoder
+  def reshape_data(self, data, labels):
+    data = data.reshape((-1, data.shape[2], data.shape[3]))
+    data = data[..., np.newaxis]
+
+    labels = labels.reshape((-1, labels.shape[2], labels.shape[3]))
+    labels = labels[..., np.newaxis]
+    return data, labels
 
 
-def train(x_train, y_train, autoencoder = None):
-  autoencoder.train(x_train, y_train, BATCH_SIZE, EPOCHS)
-  print("Training complete")
-  return autoencoder
+  def split_data(data, labels):
+    num_samples = len(data)
+    num_train_samples = int(num_samples * 0.8)
+    data_train = data[:num_train_samples]
+    labels_train = labels[:num_train_samples]
+    data_test = data[num_train_samples:]
+    labels_test = labels[num_train_samples:]
+    return data_train, labels_train, data_test, labels_test
 
 
-def test(x_test, y_test, autoencoder = None):
-  if autoencoder is not None:
-    autoencoder.test(x_test, y_test)
-    print("Testing complete")
-  else:
-    print("No model to test")
-
-
-if __name__ == "__main__":
-  autoencoder = None
-  x_train, y_train, x_test, y_test = split_data(*load_data())
-  autoencoder = load_model(autoencoder)
-  autoencoder = train(x_train, y_train, autoencoder)
-  test(x_test, y_test, autoencoder)
+  def train(self, data, label, autoencoder = None, batch_size=8, epochs=10):
+    autoencoder.train(data, label, batch_size, epochs)
+    print("Training complete")
+    
+    return autoencoder
   
+  def test(self, data, label, autoencoder):
+    autoencoder.test(data, label)
+    print("Testing complete")

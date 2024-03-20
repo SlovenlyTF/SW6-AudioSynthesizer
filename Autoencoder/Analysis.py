@@ -1,5 +1,6 @@
-from Audio_to_spectrogram import AudioProcessor
+from AudioProcessor import AudioProcessor
 from Autoencoder import VAE
+from Train import TrainModel
 import librosa
 import numpy as np
 
@@ -15,51 +16,43 @@ autoencoder = VAE(
 autoencoder.summary()
 autoencoder.compile(learning_rate=0.0005)
 
-processor = AudioProcessor()
+processor = AudioProcessor(VAE=autoencoder)
+train_model = TrainModel()
 
-# Load the data
+
 train_file_path = "./data/train"
 test_file_path = "./data/test"
-train_data = processor.create_spectrogram_from_dir(train_file_path)
-train_data = np.array(train_data)
-test_data = processor.create_spectrogram_from_dir(test_file_path)
-test_data.append(test_data[0])
-test_data = np.array(test_data)
 
-# reshape the data
-train_data = train_data.reshape((-1, train_data.shape[2], train_data.shape[3]))
-train_data = train_data[..., np.newaxis]
+data, labels = train_model.load_data(train_file_path, test_file_path)
+data, labels = train_model.reshape_data(data, labels)
 
-test_data = test_data.reshape((-1, test_data.shape[2], test_data.shape[3]))
-test_data = test_data[..., np.newaxis]
+x_train, y_train = data, labels
 
-
-print(f"Train Data shape: {train_data.shape}")
-print(f"Test Data shape: {test_data.shape}")
 
 should_train = False
 
 if should_train:
-  # Train the model
-  autoencoder.train(train_data, train_data, num_epochs=10, batch_size=8)
+  autoencoder = train_model.train(x_train, y_train, autoencoder, batch_size=8, epochs=10)
   autoencoder.save("./model")
 else:
   autoencoder = autoencoder.load("./model")
 
-predict_data = test_data[0][None, ...]
+
+# predict_data = data[0][np.newaxis, ...]
+predict_data = data[0:8]
 
 # Predict the model
-predictions = autoencoder.reconstruct(predict_data)
+predictions, laten_space = processor.generate(predict_data)
+
+# scale the predictions up
+predictions = predictions * 1000
+print(f"min: {np.min(predictions)}, max: {np.max(predictions)}")
+
+processor.save_audio(predictions, "./")
 
 
-# Denormalize the data
-denormalized_predictions = processor.denormalize(predictions)
-denormalized_test_data = processor.denormalize(train_data[0])
 
 
-# Spectrogram of predicted data and original data
-librosa.display.specshow(denormalized_predictions, sr=22050, x_axis='time', y_axis='log')
-librosa.display.specshow(denormalized_test_data, sr=22050, x_axis='time', y_axis='log')
 
 
 
