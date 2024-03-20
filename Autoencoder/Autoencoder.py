@@ -46,6 +46,10 @@ class VAE:
     self.loss_weight = 1000000
     self.num_conv_layers = len(conv_filters)
 
+    physical_devices = tf.config.experimental.list_physical_devices('GPU')
+    if len(physical_devices) > 0:
+      tf.config.experimental.set_memory_growth(physical_devices[0], True)
+
     self._build()
 
 
@@ -115,29 +119,6 @@ class VAE:
     early_stopper = EarlyStopping(monitor='loss', min_delta=10, patience=3)
 
     callbacks = [early_stopper]
-
-    # # Create an iterator for your dataset
-    # dataset = tf.data.Dataset.from_tensor_slices((x_train, y_train))
-
-    # # Define any transformations or preprocessing steps
-    # dataset = dataset.batch(batch_size)  # Example: Batch the dataset
-
-    # # Create an iterator for your dataset
-    # iterator = tf.compat.v1.data.make_one_shot_iterator(dataset)
-    # data = iterator.get_next()
-
-    # # Start a TensorFlow session
-    # with tf.compat.v1.Session() as sess:
-    #   # Initialize global variables
-    #   sess.run(tf.compat.v1.global_variables_initializer())
-
-    #   # Train your model
-    #   for epoch in range(num_epochs):
-    #     print(f'Epoch {epoch + 1}/{num_epochs}')
-    #     for batch in range(batch_size):
-    #       print(f'Batch {batch + 1}/{batch_size}')
-    #       x_batch, y_batch = sess.run(data)  # Fetch data from the iterator
-    #       self.autoencoder.train_on_batch(x_batch, y_batch)
 
 
     self.autoencoder.fit(

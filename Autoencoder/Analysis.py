@@ -4,6 +4,8 @@ from Train import TrainModel
 import librosa
 import numpy as np
 
+
+
 # Load the model
 autoencoder = VAE(
   spectrogram_dim=(1024, 128, 1),
@@ -29,7 +31,7 @@ data, labels = train_model.reshape_data(data, labels)
 x_train, y_train = data, labels
 
 
-should_train = False
+should_train = True
 
 if should_train:
   autoencoder = train_model.train(x_train, y_train, autoencoder, batch_size=8, epochs=10)
@@ -45,7 +47,7 @@ predict_data = data[0:8]
 predictions, laten_space = processor.generate(predict_data)
 
 # scale the predictions up
-predictions = predictions * 1000
+predictions = predictions * 100
 print(f"min: {np.min(predictions)}, max: {np.max(predictions)}")
 
 processor.save_audio(predictions, "./")

@@ -1,0 +1,12 @@
+pip install --upgrade --force-reinstall <package>==<version>
+
+
+Python 3.8
+
+In that order:
+librosa==0.8.1
+numba==0.54.1
+matplotlib==3.5.1
+scipy==1.6.3
+tensorflow==2.3.1
+protobuf==3.20.3

@@ -1,0 +1,6 @@
+pip install --upgrade --force-reinstall librosa==0.8.1
+pip install --upgrade --force-reinstall numba==0.54.1
+pip install --upgrade --force-reinstall matplotlib==3.5.1
+pip install --upgrade --force-reinstall scipy==1.6.3
+pip install --upgrade --force-reinstall tensorflow==2.3.1
+pip install --upgrade --force-reinstall protobuf==3.20.3
