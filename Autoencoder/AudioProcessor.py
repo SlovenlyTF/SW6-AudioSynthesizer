@@ -2,10 +2,11 @@ import numpy as np
 import librosa
 import os
 import math
+import soundfile as sf
 
 
 class AudioProcessor:
-  def __init__(self, sample_rate=22050, n_fft=2048, hop_length=512, n_mels=128, duration=2.97, mono=True, mode="constant", normalize_min=0, normalize_max=1):
+  def __init__(self, sample_rate=22050, n_fft=2048, hop_length=512, n_mels=128, duration=2.97, mono=True, mode="constant", normalize_min=0, normalize_max=1, VAE=None):
     self.sample_rate = sample_rate
     self.n_fft = n_fft
     self.hop_length = hop_length
@@ -15,18 +16,7 @@ class AudioProcessor:
     self.mode = mode
     self.normalize_min = normalize_min
     self.normalize_max = normalize_max
-
-
-  def normalizer(self, signal):
-    normalized_signal = (signal - signal.min()) / (signal.max() - signal.min())
-    normalized_signal = normalized_signal * (self.normalize_max - self.normalize_min) + self.normalize_min
-    return normalized_signal
-  
-
-  def denormalize(self, normalized_signal, original_signal_max=40, original_signal_min=-40):
-    denormalized_signal = (normalized_signal - self.normalize_min) / (self.normalize_max - self.normalize_min)
-    denormalized_signal = normalized_signal * (original_signal_max - original_signal_min) + original_signal_min
-    return denormalized_signal
+    self.vae = VAE
 
 
   def log_spectrogram(self, signal):
@@ -55,7 +45,7 @@ class AudioProcessor:
     return segments
 
 
-  def file_processor(self, file_path):
+  def _file_processor(self, file_path):
     signal = self.load_signal(file_path)
     segments = self.split_signal(signal, self.duration, self.sample_rate)
 
@@ -76,16 +66,46 @@ class AudioProcessor:
     for file in os.listdir(dir_path):
       print(f"Processing {file}...")
       file_path = os.path.join(dir_path, file)
-      spectrogram = self.file_processor(file_path)
+      spectrogram = self._file_processor(file_path)
       spectrograms.append(spectrogram)
       print(f"processed.")
     return spectrograms
   
 
-  def create_waveform_from_dir(self, dir_path):
-    waveforms = []
-    for file in os.listdir(dir_path):
-      file_path = os.path.join(dir_path, file)
-      signal = self.load_signal(file_path)
-      waveforms.append(signal)
-    return waveforms
+  def save_audio(self, signal, file_path):
+    file_path_name = os.path.join(file_path, "generated_audio.wav")
+    sf.write(file_path_name, signal, self.sample_rate)
+    print(f"Audio saved at {file_path}")
+
+
+  def normalizer(self, signal):
+    normalized_signal = (signal - signal.min()) / (signal.max() - signal.min())
+    normalized_signal = normalized_signal * (self.normalize_max - self.normalize_min) + self.normalize_min
+    return normalized_signal
+  
+
+  def denormalize(self, normalized_signal, original_signal_max=40, original_signal_min=-40):
+    denormalized_signal = (normalized_signal - self.normalize_min) / (self.normalize_max - self.normalize_min)
+    denormalized_signal = denormalized_signal * (original_signal_max - original_signal_min) + original_signal_min
+    return denormalized_signal
+
+
+  def generate(self, spectrograms):
+    generated_spectrograms, latent_space = self.vae.reconstruct(spectrograms)
+    signals = self.convert_spectrogram_to_signal(generated_spectrograms)
+    return signals, latent_space
+
+
+  def convert_spectrogram_to_signal(self, spectrograms):
+    signals = []
+    for spectrogram in spectrograms:
+      log_spectrogram = spectrogram[:, :, 0]
+      denomilized_spectrogram = self.denormalize(log_spectrogram)
+      spec = librosa.db_to_amplitude(denomilized_spectrogram)
+      signal = librosa.istft(spec, hop_length=self.hop_length)
+      signals.append(signal)
+    signals = np.array(signals)
+    signals = np.concatenate(signals, axis=0)
+    print(f"min: {np.min(signals)}, max: {np.max(signals)}")
+    print(f"Generated {len(signals)} samples.")
+    return signals

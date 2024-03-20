@@ -11,7 +11,6 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.losses import MeanSquaredError
 from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 import tensorflow as tf
-import math
 
 tf.compat.v1.disable_eager_execution()
 
