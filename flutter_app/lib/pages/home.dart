@@ -7,6 +7,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 final record = AudioRecorder();
+final player = AudioPlayer();
 
 enum OperationLabel {
   flipAudio('Flip Audio', 'flip-audio'),
@@ -26,6 +27,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   bool isRecording = false;
+  bool isPlaying = false;
 
   final TextEditingController operationController = TextEditingController();
   OperationLabel? selectedOperation;
@@ -35,29 +37,40 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       body: Column(
         children: <Widget>[
-
           // LOGO ROW
-          const Center(
-            child: Text(
-              'Logo here',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+          const Expanded(
+            child: Center(
+              child: Text(
+                'Logo here',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
 
           // GENERATION OPTIONS
           Expanded(
+            flex: 4,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 // Audio operation dropdown
                 DropdownMenu<OperationLabel>(
                   initialSelection: OperationLabel.flipAudio,
                   controller: operationController,
                   requestFocusOnTap: true,
-                  label: const Text('Operation'),
+                  label: const Text('Operation', style: TextStyle(color: Colors.white)),
                   textStyle: const TextStyle(
+                    color: Colors.white,
+                  ),
+                  trailingIcon: const Icon(
+                    Icons.arrow_drop_down,
+                    color: Colors.white,
+                  ),
+                  selectedTrailingIcon: const Icon(
+                    Icons.arrow_drop_up,
                     color: Colors.white,
                   ),
                   onSelected: (OperationLabel? operation) {
@@ -78,52 +91,85 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // ACTION BUTTONS
-          // All circular and width=vw/7 mx=vw/14
-          Row(
-            children: <Widget>[
-              // Record button
-              ElevatedButton(
-                onPressed: () {
-                  if (isRecording) {
-                    stopRecording(selectedOperation);
-                    setState(() {
-                      isRecording = false;
-                    });
-                  } else {
-                    startRecording();
-                    setState(() {
-                      isRecording = true;
-                    });
-                  }
-                },
-                child: isRecording ? const Text('Stop') : const Text('Record'),
-              ),
+          Expanded(
+            // ACTION BUTTONS
+            // All circular and width=vw/7 mx=vw/14
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                // Record button
+                ElevatedButton(
+                  onPressed: () {
+                    if (isRecording) {
+                      stopRecording(selectedOperation);
+                      setState(() {
+                        isRecording = false;
+                      });
+                    } else {
+                      startRecording();
+                      setState(() {
+                        isRecording = true;
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                  ),
+                  child: isRecording ? const Icon(Icons.square) : const Icon(Icons.mic),
+                ),
 
-              // Generate button
-              ElevatedButton(
-                onPressed: () {
-                  if (selectedOperation != null) {
-                    stopRecording(selectedOperation);
-                  } else {
-                    showDebugToast('Please select an operation', Colors.red);
-                  }
-                },
-                child: const Text('Generate'),
-              ),
+                // Generate button
+                ElevatedButton(
+                  onPressed: () {
+                    if (selectedOperation != null) {
+                      stopRecording(selectedOperation);
+                    } else {
+                      showDebugToast('Please select an operation', Colors.red);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                  ),
+                  child: const Icon(Icons.multitrack_audio_rounded),
+                ),
 
-              // Save button
-              ElevatedButton(
-                onPressed: () {
-                  if (selectedOperation != null) {
-                    playRecording();
-                  } else {
-                    showDebugToast('Please select an operation', Colors.red);
-                  }
-                },
-                child: const Text('Play'),
-              ),
-            ],
+                // Save button
+                ElevatedButton(
+                  onPressed: () {
+                    // IMPLEMENT SAVE FUNCTIONALITY
+                    print('Save button pressed');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                  ),
+                  child: const Icon(Icons.save),
+                ),
+              ],
+            ),
+          ),
+
+          Expanded(
+            // PLAY AUDIO & SLIDER
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                // Play button
+                ElevatedButton(
+                  onPressed: () {
+                    !isPlaying ? playRecording(player) : player.pause();
+                    setState(() {
+                      isPlaying = !isPlaying;
+                    });
+                    print(isPlaying);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    shape: const CircleBorder(),
+                  ),
+                  child: !isPlaying ? const Icon(Icons.play_arrow) : const Icon(Icons.pause),
+                ),
+                // IMPLEMENT AUDIO PLAYBACK SLIDER
+              ],
+            ),
           ),
         ],
       ),
@@ -233,12 +279,10 @@ Future<bool> downloadRecording(String url) async {
   return response.statusCode == 200;
 }
 
-void playRecording() async {
+void playRecording(AudioPlayer player) async {
   // Define local file path
   Directory appDocumentsDirectory = await getApplicationDocumentsDirectory();
   String filePath = '${appDocumentsDirectory.path}/audio.wav';
-
-  AudioPlayer player = AudioPlayer();
   try {
     player.play(DeviceFileSource(filePath));
   } catch (error) {
