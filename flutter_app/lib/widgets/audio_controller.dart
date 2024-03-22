@@ -94,6 +94,10 @@ class _AudioControllerState extends State<AudioController> {
                   SliderTheme(
                     data: const SliderThemeData(
                       trackShape: CustomSliderTrackShape(),
+                      thumbShape: RoundSliderThumbShape(
+                        enabledThumbRadius: 5,
+                        disabledThumbRadius: 0,
+                      ),
                     ),
                     child: Slider(
                       value: _sliderValue,
