@@ -90,7 +90,6 @@ class _HomePageState extends State<HomePage> {
 
           Expanded(
             // ACTION BUTTONS
-            // All circular and width=vw/7 mx=vw/14
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
@@ -104,8 +103,12 @@ class _HomePageState extends State<HomePage> {
                   },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
+                    minimumSize: const Size(75, 75),
+                    backgroundColor: isRecording ? Colors.red : Colors.blue[600],
                   ),
-                  child: isRecording ? const Icon(Icons.square) : const Icon(Icons.mic),
+                  child: isRecording ?
+                    const Icon(Icons.square, color: Colors.white, size: 30) :
+                    const Icon(Icons.mic, color: Colors.white, size: 30),
                 ),
 
                 // Generate button
@@ -115,8 +118,10 @@ class _HomePageState extends State<HomePage> {
                   },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
+                    minimumSize: const Size(75, 75),
+                    backgroundColor: Colors.cyan[300],
                   ),
-                  child: const Icon(Icons.multitrack_audio_rounded),
+                  child: const Icon(Icons.multitrack_audio_rounded, color: Colors.white, size: 30),
                 ),
 
                 // Save button
@@ -127,8 +132,10 @@ class _HomePageState extends State<HomePage> {
                   },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
+                    minimumSize: const Size(75, 75),
+                    backgroundColor: Colors.blue[600],
                   ),
-                  child: const Icon(Icons.save),
+                  child: const Icon(Icons.save, color: Colors.white, size: 30),
                 ),
               ],
             ),
