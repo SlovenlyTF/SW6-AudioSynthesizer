@@ -40,12 +40,9 @@ class _HomePageState extends State<HomePage> {
           // LOGO ROW
           const Expanded(
             child: Center(
-              child: Text(
-                'Logo here',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: Image(
+                image: AssetImage('assets/images/sonic-eye-logo.png'),
+                width: 100,
               ),
             ),
           ),
@@ -100,17 +97,10 @@ class _HomePageState extends State<HomePage> {
                 // Record button
                 ElevatedButton(
                   onPressed: () {
-                    if (isRecording) {
-                      stopRecording(selectedOperation);
-                      setState(() {
-                        isRecording = false;
-                      });
-                    } else {
-                      startRecording();
-                      setState(() {
-                        isRecording = true;
-                      });
-                    }
+                    isRecording ? stopRecording() : startRecording();
+                    setState(() {
+                      isRecording = !isRecording;
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
@@ -121,11 +111,7 @@ class _HomePageState extends State<HomePage> {
                 // Generate button
                 ElevatedButton(
                   onPressed: () {
-                    if (selectedOperation != null) {
-                      stopRecording(selectedOperation);
-                    } else {
-                      showDebugToast('Please select an operation', Colors.red);
-                    }
+                    generateAudio(selectedOperation);
                   },
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
@@ -199,11 +185,16 @@ void showDebugToast(String message, [Color? color]) {
       fontSize: 16.0);
 }
 
-void stopRecording(OperationLabel? operation) async {
+void stopRecording() async {
   await record.stop();
-  //sendRecording();
+}
 
-  showDebugToast('Stopped recording, sending to server');
+void deleteRecording() async {
+  record.dispose();
+}
+
+void generateAudio(OperationLabel? operation) async {
+  showDebugToast('Sending audio to server');
 
   String resultUri = await sendRecording(operation ?? OperationLabel.flipAudio);
 
@@ -224,10 +215,6 @@ void stopRecording(OperationLabel? operation) async {
       showDebugToast('Failed to download audio from server', Colors.red);
     }
   }
-}
-
-void deleteRecording() async {
-  record.dispose();
 }
 
 Future<String> sendRecording(OperationLabel operation) async {
