@@ -7,19 +7,33 @@ class TrainModel:
     self.processor = AudioProcessor()
 
   def load_data(self, data_file_path, label_file_path):
+    print()
+    print("---Loading train data---")
     data = self.processor.create_spectrogram_from_dir(data_file_path)
     data = np.array(data)
+    print()
+    print("---Loading test labels---")
     labels = self.processor.create_spectrogram_from_dir(label_file_path)
     labels = np.array(labels)
     return data, labels
 
 
-  def reshape_data(self, data, labels):
-    data = data.reshape((-1, data.shape[2], data.shape[3]))
+  def reshape_data(self, data_1, labels_1):
+    data = []
+    for i in range(len(data_1)):
+      for j in range(len(data_1[i])):
+        data.append(data_1[i][j])
+    data = np.array(data)
     data = data[..., np.newaxis]
 
-    labels = labels.reshape((-1, labels.shape[2], labels.shape[3]))
+    labels = []
+    for i in range(len(labels_1)):
+      for j in range(len(labels_1[i])):
+        labels.append(labels_1[i][j])
+    labels = np.array(labels)
     labels = labels[..., np.newaxis]
+
+    print(f"Data shape: {data.shape}, Labels shape: {labels.shape}")
     return data, labels
 
 

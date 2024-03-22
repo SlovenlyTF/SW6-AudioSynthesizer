@@ -34,7 +34,7 @@ x_train, y_train = data, labels
 should_train = True
 
 if should_train:
-  autoencoder = train_model.train(x_train, y_train, autoencoder, batch_size=8, epochs=10)
+  autoencoder = train_model.train(x_train, y_train, autoencoder, batch_size=8, epochs=2)
   autoencoder.save("./model")
 else:
   autoencoder = autoencoder.load("./model")
@@ -51,10 +51,4 @@ predictions = predictions * 100
 print(f"min: {np.min(predictions)}, max: {np.max(predictions)}")
 
 processor.save_audio(predictions, "./")
-
-
-
-
-
-
 

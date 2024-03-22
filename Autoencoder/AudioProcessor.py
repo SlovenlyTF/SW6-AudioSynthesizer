@@ -33,7 +33,9 @@ class AudioProcessor:
   
   
   def load_signal(self, file_path):
-    signal = librosa.load(file_path, sr=self.sample_rate, mono=self.mono)[0]
+    signal, sr = librosa.load(file_path, mono=self.mono)
+    if sr != self.sample_rate:
+      signal = librosa.resample(signal, sr, self.sample_rate)
     return signal
 
 
@@ -54,21 +56,18 @@ class AudioProcessor:
     segments[segment_length-1] = self.right_pad(segments[segment_length-1], self.duration, self.sample_rate)
 
     spectrograms = [self.log_spectrogram(segment) for segment in segments]
-    
     for i in range(len(spectrograms)):
       spectrograms[i] = self.normalizer(spectrograms[i])
-
     return spectrograms
 
   
   def create_spectrogram_from_dir(self, dir_path):
     spectrograms = []
-    for file in os.listdir(dir_path):
-      print(f"Processing {file}...")
+    for i, file in enumerate(os.listdir(dir_path)):
       file_path = os.path.join(dir_path, file)
       spectrogram = self._file_processor(file_path)
       spectrograms.append(spectrogram)
-      print(f"processed.")
+      print(f"({i + 1} of {len(os.listdir(dir_path))}) Processed: {file}")
     return spectrograms
   
 
@@ -79,6 +78,9 @@ class AudioProcessor:
 
 
   def normalizer(self, signal):
+    if (signal.max() - signal.min()) == 0:
+      print("Warning: Normalization failed. Returning original signal.")
+      return signal
     normalized_signal = (signal - signal.min()) / (signal.max() - signal.min())
     normalized_signal = normalized_signal * (self.normalize_max - self.normalize_min) + self.normalize_min
     return normalized_signal
