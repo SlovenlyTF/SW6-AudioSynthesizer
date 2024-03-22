@@ -46,10 +46,6 @@ class VAE:
     self.loss_weight = 1000000
     self.num_conv_layers = len(conv_filters)
 
-    physical_devices = tf.config.experimental.list_physical_devices('GPU')
-    if len(physical_devices) > 0:
-      tf.config.experimental.set_memory_growth(physical_devices[0], True)
-
     self._build()
 
 
@@ -120,14 +116,19 @@ class VAE:
 
     callbacks = [early_stopper]
 
-
     self.autoencoder.fit(
       x_train, y_train,
       batch_size=batch_size,
       epochs=num_epochs,
-      shuffle=True,
-      callbacks=callbacks
+      shuffle=True
     )
+    # self.autoencoder.fit(
+    #   x_train, y_train,
+    #   batch_size=batch_size,
+    #   epochs=num_epochs,
+    #   shuffle=True,
+    #   callbacks=callbacks
+    # )
 
   ### Encoder
   def _build_encoder(self):
