@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import 'package:flutter_app/widgets/audio_controller.dart';
+
 final record = AudioRecorder();
 final player = AudioPlayer();
 
@@ -95,7 +97,8 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 // Record button
                 ElevatedButton(
-                  onPressed: () {
+                  
+                  onPressed: true ? null : () {
                     isRecording ? stopRecording() : startRecording();
                     setState(() {
                       isRecording = !isRecording;
@@ -141,25 +144,12 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          Expanded(
+          const Expanded(
             // PLAY AUDIO & SLIDER
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                // Play button
-                ElevatedButton(
-                  onPressed: () {
-                    !isPlaying ? playRecording(player) : player.pause();
-                    setState(() {
-                      isPlaying = !isPlaying;
-                    });
-                    print(isPlaying);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                  ),
-                  child: !isPlaying ? const Icon(Icons.play_arrow) : const Icon(Icons.pause),
-                ),
+                const AudioController(),
                 // IMPLEMENT AUDIO PLAYBACK SLIDER
               ],
             ),
