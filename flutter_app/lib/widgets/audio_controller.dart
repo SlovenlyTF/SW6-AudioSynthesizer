@@ -96,9 +96,11 @@ class _AudioControllerState extends State<AudioController> {
                 children: <Widget>[
                   // SLIDER BAR
                   SliderTheme(
-                    data: const SliderThemeData(
-                      trackShape: CustomSliderTrackShape(),
-                      thumbShape: RoundSliderThumbShape(
+                    data: SliderThemeData(
+                      activeTrackColor: Colors.cyan[300],
+                      thumbColor: Colors.cyan[100],
+                      trackShape: const CustomSliderTrackShape(),
+                      thumbShape: const RoundSliderThumbShape(
                         enabledThumbRadius: 5,
                         disabledThumbRadius: 0,
                       ),
