@@ -55,6 +55,10 @@ class _AudioControllerState extends State<AudioController> {
     if (_isPlaying) {
       _audioPlayer.pause();
     } else {
+      // Restart if at the end
+      if (_audioPlayer.position >= (_audioPlayer.duration ?? Duration.zero)) {
+        _audioPlayer.seek(Duration.zero);
+      }
       _audioPlayer.play();
     }
   }
@@ -102,7 +106,7 @@ class _AudioControllerState extends State<AudioController> {
                     child: Slider(
                       value: _sliderValue,
                       min: 0.0,
-                      max: (_audioPlayer.duration?.inMilliseconds.toDouble() ?? 0.0)+100.0,
+                      max: (_audioPlayer.duration?.inMilliseconds.toDouble() ?? 0.0)+100.0, // Add padding to avoid overflowing, this fix is hot garbage <3
                       onChanged: _seek,
                     ),
                   ),
