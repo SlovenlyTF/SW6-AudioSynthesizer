@@ -43,7 +43,7 @@ class VAE:
     self._shape_before_bottleneck = None
     self._model_input = None
 
-    self.loss_weight = 1000000
+    self.loss_weight = 100000000
     self.num_conv_layers = len(conv_filters)
 
     self._build()

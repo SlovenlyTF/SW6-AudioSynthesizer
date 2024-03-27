@@ -80,7 +80,7 @@ predict_data = data[0:8]
 predictions, laten_space = processor.generate(predict_data)
 
 # scale the predictions up
-predictions = predictions * 50
+predictions = predictions * 4
 print(f"min: {np.min(predictions)}, max: {np.max(predictions)}")
 
 processor.save_audio(predictions, "./")

@@ -1,0 +1,4 @@
+27/03-2024
+
+Generated audio from one epoch on hum and beepboop audio.
+The learning steps might have been too big.

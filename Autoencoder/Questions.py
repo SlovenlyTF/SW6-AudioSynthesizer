@@ -47,11 +47,11 @@ class questions:
 
     def switch(x):
       return {
-          'Big steps': 0.005,
-          'Medium steps': 0.0015,
-          'Standard steps': 0.0005,
-          'Small steps': 0.00015,
-          'Tiny steps': 0.00005,
+          'Big steps': 0.0005,
+          'Medium steps': 0.00015,
+          'Standard steps': 0.00005,
+          'Small steps': 0.000015,
+          'Tiny steps': 0.000005,
       }[x]
     answer = inquirer.prompt(learning_rate_questions)
     answer = switch(answer['learning rate'])

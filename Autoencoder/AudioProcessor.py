@@ -6,7 +6,7 @@ import soundfile as sf
 
 
 class AudioProcessor:
-  def __init__(self, sample_rate=22050, n_fft=2048, hop_length=512, n_mels=128, duration=2.97, mono=True, mode="constant", normalize_min=0, normalize_max=1, VAE=None):
+  def __init__(self, sample_rate=22050, n_fft=2048, hop_length=512, n_mels=128, duration=2.97, mono=True, mode="constant", normalize_min=-1, normalize_max=1, VAE=None):
     self.sample_rate = sample_rate
     self.n_fft = n_fft
     self.hop_length = hop_length
@@ -97,17 +97,18 @@ class AudioProcessor:
     signals = self.convert_spectrogram_to_signal(generated_spectrograms)
     return signals, latent_space
 
+  
 
   def convert_spectrogram_to_signal(self, spectrograms):
-    signals = []
+    spec = []
     for spectrogram in spectrograms:
       log_spectrogram = spectrogram[:, :, 0]
       denomilized_spectrogram = self.denormalize(log_spectrogram)
-      spec = librosa.db_to_amplitude(denomilized_spectrogram)
-      signal = librosa.istft(spec, hop_length=self.hop_length)
-      signals.append(signal)
-    signals = np.array(signals)
-    signals = np.concatenate(signals, axis=0)
-    print(f"min: {np.min(signals)}, max: {np.max(signals)}")
-    print(f"Generated {len(signals)} samples.")
-    return signals
+      spec.append(librosa.db_to_amplitude(denomilized_spectrogram))
+    spec = np.array(spec)
+    print(f"Spec shape: {spec.shape}")
+    spec = np.concatenate(spec, axis=1)
+    print(f"Spec shape: {spec.shape}")
+
+    signal = librosa.istft(spec, hop_length=self.hop_length)
+    return signal
