@@ -94,7 +94,7 @@ def train_fn(
         g_scaler.step(opt_gen)
         g_scaler.update()
 
-        if idx % 200 == 0:
+        if idx % 10 == 0:
             save_image(fake_horse * 0.5 + 0.5, f"saved_images/horse_{idx}.png")
             save_image(fake_zebra * 0.5 + 0.5, f"saved_images/zebra_{idx}.png")
 
