@@ -23,7 +23,7 @@ from gen_model import Generator
 
 
 def train_fn(
-    disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d_scaler, g_scaler
+    disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d_scaler, g_scaler, epoch_num
 ):
     H_reals = 0
     H_fakes = 0
@@ -94,9 +94,9 @@ def train_fn(
         g_scaler.step(opt_gen)
         g_scaler.update()
 
-        if idx % 10 == 0:
-            save_image(fake_horse * 0.5 + 0.5, f"saved_images/horse_{idx}.png")
-            save_image(fake_zebra * 0.5 + 0.5, f"saved_images/zebra_{idx}.png")
+        if idx % 50 == 0:
+            save_image(fake_horse * 0.5 + 0.5, f"saved_images_horse/epoch_{epoch_num}_index_{idx}.png")
+            save_image(fake_zebra * 0.5 + 0.5, f"saved_images_zebra/epoch_{epoch_num}_index_{idx}.png")
 
         loop.set_postfix(H_real=H_reals / (idx + 1), H_fake=H_fakes / (idx + 1))
 
@@ -187,6 +187,7 @@ def main():
             mse,
             d_scaler,
             g_scaler,
+            epoch_num=epoch,
         )
 
         if config.SAVE_MODEL:
