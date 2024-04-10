@@ -20,6 +20,7 @@ from tqdm import tqdm
 from torchvision.utils import save_image
 from discriminator_model import Discriminator
 from gen_model import Generator
+import numpy
 
 
 def train_fn(
@@ -102,10 +103,10 @@ def train_fn(
 
 
 def main():
-    disc_H = Discriminator(in_channels=3).to(config.DEVICE)
-    disc_Z = Discriminator(in_channels=3).to(config.DEVICE)
-    gen_Z = Generator(img_channels=3, num_residuals=9).to(config.DEVICE)
-    gen_H = Generator(img_channels=3, num_residuals=9).to(config.DEVICE)
+    disc_H = Discriminator(in_channels=config.IMAGECHANNELS).to(config.DEVICE)
+    disc_Z = Discriminator(in_channels=config.IMAGECHANNELS).to(config.DEVICE)
+    gen_Z = Generator(img_channels=config.IMAGECHANNELS, num_residuals=9).to(config.DEVICE)
+    gen_H = Generator(img_channels=config.IMAGECHANNELS, num_residuals=9).to(config.DEVICE)
     opt_disc = optim.Adam(
         list(disc_H.parameters()) + list(disc_Z.parameters()),
         lr=config.LEARNING_RATE,
