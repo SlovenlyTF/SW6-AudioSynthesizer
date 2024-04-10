@@ -23,7 +23,7 @@ def main():
 
 
   processor = AudioProcessor()
-  DataProcessor = DataProcessor()
+  data_processor = DataProcessor()
   # questions = questions(processed_data_file_path, processed_label_file_path, model_weights_path, model_params_path)
 
 
@@ -37,7 +37,7 @@ def main():
   #   data = np.load(processed_data_file_path)
   #   labels = np.load(processed_label_file_path)
   # else:
-  data, labels = DataProcessor.load_data(data_files_path, label_files_path)
+  data, labels = data_processor.load_data(data_files_path, label_files_path)
   np.save(processed_data_file_path, data)
   np.save(processed_label_file_path, labels)
 

@@ -20,7 +20,7 @@ class HumMusicDataset(Dataset):
         music_img = self.music_numpy_array[index % self.music_len]
         hum_img = self.hum_numpy_array[index % self.hum_len]
 
-        print(f"music_img.shape: {music_img.shape}, hum_img.shape: {hum_img.shape}")
+        # print(f"music_img.shape: {music_img.shape}, hum_img.shape: {hum_img.shape}")
 
         if self.transform:
             augmentations = self.transform(image=music_img, image0=hum_img)
