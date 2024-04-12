@@ -25,8 +25,9 @@ class HorseZebraDataset(Dataset):
         zebra_path = os.path.join(self.root_zebra, zebra_img)
         horse_path = os.path.join(self.root_horse, horse_img)
 
-        zebra_img = np.array(Image.open(zebra_path).convert("RGB"))
-        horse_img = np.array(Image.open(horse_path).convert("RGB"))
+        zebra_img = np.array(Image.open(zebra_path).convert("L"))
+        horse_img = np.array(Image.open(horse_path).convert("L"))
+        print(f'zebra_img: {zebra_img.shape}, horse_img: {horse_img.shape}')
 
         if self.transform:
             augmentations = self.transform(image=zebra_img, image0=horse_img)

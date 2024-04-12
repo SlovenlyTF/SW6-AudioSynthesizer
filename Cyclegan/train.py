@@ -20,10 +20,11 @@ from tqdm import tqdm
 from torchvision.utils import save_image
 from discriminator_model import Discriminator
 from gen_model import Generator
+import numpy
 
 
 def train_fn(
-    disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d_scaler, g_scaler
+    disc_H, disc_Z, gen_Z, gen_H, loader, opt_disc, opt_gen, l1, mse, d_scaler, g_scaler, epoch_num
 ):
     H_reals = 0
     H_fakes = 0
@@ -94,18 +95,18 @@ def train_fn(
         g_scaler.step(opt_gen)
         g_scaler.update()
 
-        if idx % 200 == 0:
-            save_image(fake_horse * 0.5 + 0.5, f"saved_images/horse_{idx}.png")
-            save_image(fake_zebra * 0.5 + 0.5, f"saved_images/zebra_{idx}.png")
+        if idx % 50 == 0:
+            save_image(fake_horse * 0.5 + 0.5, f"saved_images_horse/epoch_{epoch_num}_index_{idx}.png")
+            save_image(fake_zebra * 0.5 + 0.5, f"saved_images_zebra/epoch_{epoch_num}_index_{idx}.png")
 
         loop.set_postfix(H_real=H_reals / (idx + 1), H_fake=H_fakes / (idx + 1))
 
 
 def main():
-    disc_H = Discriminator(in_channels=3).to(config.DEVICE)
-    disc_Z = Discriminator(in_channels=3).to(config.DEVICE)
-    gen_Z = Generator(img_channels=3, num_residuals=9).to(config.DEVICE)
-    gen_H = Generator(img_channels=3, num_residuals=9).to(config.DEVICE)
+    disc_H = Discriminator(in_channels=config.IMAGECHANNELS).to(config.DEVICE)
+    disc_Z = Discriminator(in_channels=config.IMAGECHANNELS).to(config.DEVICE)
+    gen_Z = Generator(img_channels=config.IMAGECHANNELS, num_residuals=9).to(config.DEVICE)
+    gen_H = Generator(img_channels=config.IMAGECHANNELS, num_residuals=9).to(config.DEVICE)
     opt_disc = optim.Adam(
         list(disc_H.parameters()) + list(disc_Z.parameters()),
         lr=config.LEARNING_RATE,
@@ -187,6 +188,7 @@ def main():
             mse,
             d_scaler,
             g_scaler,
+            epoch_num=epoch,
         )
 
         if config.SAVE_MODEL:
