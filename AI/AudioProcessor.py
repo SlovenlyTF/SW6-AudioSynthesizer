@@ -6,7 +6,7 @@ import soundfile as sf
 
 
 class AudioProcessor:
-  def __init__(self, sample_rate=22050, n_fft=2048, hop_length=512, n_mels=128, duration=2.97, mono=True, mode="constant", normalize_min=-1, normalize_max=1, model=None):
+  def __init__(self, sample_rate=22050, n_fft=2048, hop_length=512, n_mels=128, duration=2.97, mono=True, mode="constant", model=None):
     self.sample_rate = sample_rate
     self.n_fft = n_fft
     self.hop_length = hop_length
@@ -14,9 +14,11 @@ class AudioProcessor:
     self.duration = duration
     self.mono = mono
     self.mode = mode
-    self.normalize_min = normalize_min
-    self.normalize_max = normalize_max
+    self.normalize_min = 0
+    self.normalize_max = 1
     self.model = model
+    self.signal_max = 40
+    self.signal_min = -40
 
 
   def log_spectrogram(self, signal):
@@ -52,12 +54,14 @@ class AudioProcessor:
     segments = self.split_signal(signal, self.duration, self.sample_rate)
 
     # Pad the last segment if it is shorter than the rest
+    # if len(segments[-1]) < self.sample_rate * self.duration:
+    #   segments.pop()
     segment_length = len(segments)
-    segments[segment_length-1] = self.right_pad(segments[segment_length-1], self.duration, self.sample_rate)
+    segments[-1] = self.right_pad(segments[-1], self.duration, self.sample_rate)
 
     spectrograms = [self.log_spectrogram(segment) for segment in segments]
-    # for i in range(len(spectrograms)):
-    #   spectrograms[i] = self.normalizer(spectrograms[i])
+    for i in range(len(spectrograms)):
+      spectrograms[i] = self.normalizer(spectrograms[i])
     return spectrograms
 
   
@@ -81,14 +85,16 @@ class AudioProcessor:
     if (signal.max() - signal.min()) == 0:
       print("Warning: Normalization failed. Returning original signal.")
       return signal
-    normalized_signal = (signal - signal.min()) / (signal.max() - signal.min())
+    normalized_signal = (signal - self.signal_min) / (self.signal_max - self.signal_min)
     normalized_signal = normalized_signal * (self.normalize_max - self.normalize_min) + self.normalize_min
+    # normalized_signal = (signal - signal.min()) / (signal.max() - signal.min())
+    # normalized_signal = normalized_signal * (self.normalize_max - self.normalize_min) + self.normalize_min
     return normalized_signal
   
 
-  def denormalize(self, normalized_signal, original_signal_max=40, original_signal_min=-40):
+  def denormalize(self, normalized_signal):
     denormalized_signal = (normalized_signal - self.normalize_min) / (self.normalize_max - self.normalize_min)
-    denormalized_signal = denormalized_signal * (original_signal_max - original_signal_min) + original_signal_min
+    denormalized_signal = denormalized_signal * (self.signal_max - self.signal_min) + self.signal_min
     return denormalized_signal
 
 
@@ -109,9 +115,10 @@ class AudioProcessor:
       denomilized_spectrogram = self.denormalize(log_spectrogram)
       spec.append(librosa.db_to_amplitude(denomilized_spectrogram))
     spec = np.array(spec)
-    print(f"Spec shape: {spec.shape}")
     spec = np.concatenate(spec, axis=1)
-    print(f"Spec shape: {spec.shape}")
+
+    if spec.dtype == np.float16:
+      spec = spec.astype(np.float32)
 
     signal = librosa.istft(spec, hop_length=self.hop_length)
     return signal

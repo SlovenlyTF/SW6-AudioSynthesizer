@@ -2,7 +2,7 @@ import inquirer
 import os
 
 class questions:
-  def __init__(self, processed_data_file_path, processed_label_file_path, model_weights_path, model_params_path):
+  def __init__(self, processed_data_file_path, processed_label_file_path, model_path):
     self.load_saved_model = False
     self.should_train = True
     self.learning_rate = 0
@@ -13,27 +13,26 @@ class questions:
     self.processed_data_file_path = processed_data_file_path
     self.processed_label_file_path = processed_label_file_path
 
-    self.model_weights_path = model_weights_path
-    self.model_params_path = model_params_path
+    self.model_path = model_path
 
 
   def ask(self):
     
-    if os.path.exists(self.model_weights_path) and os.path.exists(self.model_params_path):
+    if os.path.exists(self.model_path[0]) and os.path.exists(self.model_path[1]) and os.path.exists(self.model_path[2]) and os.path.exists(self.model_path[3]):
       self.load_saved_model = self._load_saved_model()
 
     if self.load_saved_model:
       self.should_train = self._should_train()
 
     if self.should_train:
-      self.learning_rate = self._learning_rate()
-      self.batch_size = self._batch_size()
+      # self.learning_rate = self._learning_rate()
+      # self.batch_size = self._batch_size()
       self.epochs = self._epochs()
 
-    if os.path.exists(self.processed_data_file_path) and os.path.exists(self.processed_label_file_path):
-      self.load_saved_training_data = self._load_saved_training_data()
+      if os.path.exists(self.processed_data_file_path) and os.path.exists(self.processed_label_file_path):
+        self.load_saved_training_data = self._load_saved_training_data()
 
-    return self.load_saved_model, self.should_train, self.learning_rate, self.batch_size, self.epochs, self.load_saved_training_data
+    return self.load_saved_model, self.should_train, self.epochs, self.load_saved_training_data
   
   
   def _learning_rate(self):
