@@ -147,26 +147,12 @@ class AudioProcessor:
       log[1].write("\n\n")
 
 
-      # Normalize spectrogram shape = (1024, 128, 1)
-      # Training data shape = (1, 1024, 128)
-
       # reshape numpy array from (1024, 128, 1) to list of tensor with shape (1, 1024, 128)
       np_arr = normalized_signal.reshape(1024, 128)
-
-      # Assuming np_arr is your NumPy array
       tensor = torch.from_numpy(np_arr)
       if tensor.dtype == torch.int:
         tensor = tensor.float()  # Convert integers to float if necessary
-      # tensor = tensor / 255.0  # Normalize if your data range is 0-255
       save_image(tensor + 0.5, f"{log[0]}/grayscale_segment_{idx+1}.png")
-
-      # arr = []
-      # for i in range(1024):
-      #   arr.append([])
-      #   for j in range(128):
-      #     arr[i].append(np_arr[i][j])
-
-      # save_image(np_arr + 0.5, f"{log[0]}/grayscale_segment_{idx+1}.png")
 
     return normalized_signal
   
