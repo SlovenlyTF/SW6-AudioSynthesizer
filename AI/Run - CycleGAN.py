@@ -60,7 +60,7 @@ def main():
 
   # Train the model
   print("Training the model")
-  trainer = train.trainer(x_train[0:2000], y_train[0:2000], x_train[0:1], y_train[0:1])
+  trainer = train.trainer(x_train, y_train, x_train[0:1], y_train[0:1])
   gen_1, gen_2 = trainer.run(load_saved_model, should_train, epochs)
   print("Training done")
 
