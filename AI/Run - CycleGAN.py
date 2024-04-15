@@ -8,6 +8,7 @@ import tensorflow as tf
 from Cyclegan import predict
 import torch
 import datetime
+from torchvision.utils import save_image
 
 def main():
   physical_devices = tf.config.experimental.list_physical_devices('GPU')
@@ -32,7 +33,7 @@ def main():
   # Ask the user some questions
   load_saved_model, should_train, epochs, load_saved_training_data = questions_class.ask()
 
-  log_path = f"./predict/output_no_model/{datetime.datetime.now()}"
+  log_path = f"./predict/output_model/{datetime.datetime.now()}"
   log_path = log_path.replace(" ", "_").replace(":", "-")
   os.makedirs(log_path)
   log_file = open(f"{log_path}/Log.txt", "a")
@@ -67,27 +68,22 @@ def main():
   predict_files_path = "./predict/input"
   predict_data, _ = data_processor.load_data(data_file_path=predict_files_path, log=log)
 
-  # predictions = []
-  # for i in range(predict_data.shape[0]):
-  #   np_arr = predict_data[i].reshape(1024, 128)
-  #   tensor = torch.from_numpy(np_arr)
-  #   if tensor.dtype == torch.int:
-  #     tensor = tensor.float()  # Convert integers to float if necessary
-
-  #   predictions.append(gen_1(tensor))
-    
-  # predictions = np.array(predictions)
-  # predictions = np.concatenate(predictions, axis=0)
-  # predictions = predictions[..., np.newaxis]
-
   predictions = predict.predictionClass(gen_1, predict_data).predict()
+  
+  # Save the predictions in grayscale
+  for i in range(predictions.shape[0]):
+    np_arr = predictions[i].reshape(1024, 128)
+    tensor = torch.from_numpy(np_arr)
+    if tensor.dtype == torch.int:
+      tensor = tensor.float()  # Convert integers to float if necessary
+    save_image(tensor + 0.5, f"{log[0]}/prediction_grayscale_segment_{i+1}.png")
 
   predictions = processor.convert_spectrogram_to_signal(predictions, log=log)
 
   # scale the predictions up
   print(f"min: {np.min(predictions)}, max: {np.max(predictions)}")
 
-  processor.save_audio(predictions, "predict/output_model/")
+  processor.save_audio(predictions, log_path)
 
   log_file.close()
 

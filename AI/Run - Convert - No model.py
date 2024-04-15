@@ -10,7 +10,7 @@ def main():
   processor = AudioProcessor()
   data_processor = DataProcessor()
 
-  log_path = f"./predict/output_model/{datetime.datetime.now()}"
+  log_path = f"./predict/output_no_model/{datetime.datetime.now()}"
   log_path = log_path.replace(" ", "_").replace(":", "-")
   os.makedirs(log_path)
   log_file = open(f"{log_path}/Log.txt", "a")

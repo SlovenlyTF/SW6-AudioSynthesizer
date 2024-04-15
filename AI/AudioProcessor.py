@@ -152,7 +152,7 @@ class AudioProcessor:
       tensor = torch.from_numpy(np_arr)
       if tensor.dtype == torch.int:
         tensor = tensor.float()  # Convert integers to float if necessary
-      save_image(tensor + 0.5, f"{log[0]}/grayscale_segment_{idx+1}.png")
+      save_image(tensor + 0.5, f"{log[0]}/orignal_signal_grayscale_segment_{idx+1}.png")
 
     return normalized_signal
   
