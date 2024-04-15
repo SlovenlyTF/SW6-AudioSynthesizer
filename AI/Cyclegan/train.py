@@ -113,11 +113,11 @@ class trainer:
             loop.set_postfix(H_real=H_reals / (idx + 1), H_fake=H_fakes / (idx + 1))
 
 
-    def run(self):
+    def run(self, load_saved_model, should_train, epochs):
         disc_H = discriminator_model.Discriminator(in_channels=config.IMAGECHANNELS).to(config.DEVICE)
         disc_Z = discriminator_model.Discriminator(in_channels=config.IMAGECHANNELS).to(config.DEVICE)
-        gen_Z = gen_model.Generator(img_channels=config.IMAGECHANNELS, num_residuals=9).to(config.DEVICE)
-        gen_H = gen_model.Generator(img_channels=config.IMAGECHANNELS, num_residuals=9).to(config.DEVICE)
+        gen_Z = gen_model.Generator(img_channels=config.IMAGECHANNELS).to(config.DEVICE)
+        gen_H = gen_model.Generator(img_channels=config.IMAGECHANNELS).to(config.DEVICE)
         opt_disc = optim.Adam(
             list(disc_H.parameters()) + list(disc_Z.parameters()),
             lr=config.LEARNING_RATE,
@@ -133,7 +133,7 @@ class trainer:
         L1 = nn.L1Loss()
         mse = nn.MSELoss()
 
-        if config.LOAD_MODEL:
+        if load_saved_model:
             utils.load_checkpoint(
                 config.CHECKPOINT_GEN_H,
                 gen_H,
@@ -185,25 +185,27 @@ class trainer:
         
         g_scaler = torch.cuda.amp.GradScaler()
         d_scaler = torch.cuda.amp.GradScaler()
+        if should_train:
+            for epoch in range(epochs):
+                self.train_fn(
+                    disc_H,
+                    disc_Z,
+                    gen_Z,
+                    gen_H,
+                    loader,
+                    opt_disc,
+                    opt_gen,
+                    L1,
+                    mse,
+                    d_scaler,
+                    g_scaler,
+                    epoch_num=epoch,
+                )
 
-        for epoch in range(config.NUM_EPOCHS):
-            self.train_fn(
-                disc_H,
-                disc_Z,
-                gen_Z,
-                gen_H,
-                loader,
-                opt_disc,
-                opt_gen,
-                L1,
-                mse,
-                d_scaler,
-                g_scaler,
-                epoch_num=epoch,
-            )
+                if config.SAVE_MODEL:
+                    utils.save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)
+                    utils.save_checkpoint(gen_Z, opt_gen, filename=config.CHECKPOINT_GEN_Z)
+                    utils.save_checkpoint(disc_H, opt_disc, filename=config.CHECKPOINT_CRITIC_H)
+                    utils.save_checkpoint(disc_Z, opt_disc, filename=config.CHECKPOINT_CRITIC_Z)
 
-            if config.SAVE_MODEL:
-                utils.save_checkpoint(gen_H, opt_gen, filename=config.CHECKPOINT_GEN_H)
-                utils.save_checkpoint(gen_Z, opt_gen, filename=config.CHECKPOINT_GEN_Z)
-                utils.save_checkpoint(disc_H, opt_disc, filename=config.CHECKPOINT_CRITIC_H)
-                utils.save_checkpoint(disc_Z, opt_disc, filename=config.CHECKPOINT_CRITIC_Z)
+        return gen_H, gen_Z

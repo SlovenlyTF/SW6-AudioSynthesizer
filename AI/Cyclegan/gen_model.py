@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from Cyclegan import config
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels, down=True, use_act=True, **kwargs):
@@ -27,7 +28,7 @@ class ResidualBlock(nn.Module):
         return x + self.block(x)
     
 class Generator(nn.Module):
-    def __init__(self, img_channels, num_features = 64, num_residuals = 9):
+    def __init__(self, img_channels, num_features = config.NUM_FEATURES, num_residuals = config.NUM_RESIDUALS):
         super().__init__()
         self.initial = nn.Sequential(
             nn.Conv2d(img_channels, num_features, kernel_size=7, stride=1, padding=3, padding_mode='reflect'),

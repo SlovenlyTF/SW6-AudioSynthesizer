@@ -5,6 +5,7 @@ from Questions import questions
 import os
 import numpy as np
 import tensorflow as tf
+from Cyclegan import predict
 
 def main():
   physical_devices = tf.config.experimental.list_physical_devices('GPU')
@@ -18,51 +19,57 @@ def main():
   processed_data_file_path = "./data/processed_data.npy"
   processed_label_file_path = "./data/processed_label.npy"
 
-  model_weights_path = "./model/weights.h5"
-  model_params_path = "./model/parameters.pkl"
+  model_path = ["./model/genh.pth.tar", "./model/genz.pth.tar", "./model/critich.pth.tar", "./model/criticz.pth.tar"]
 
 
   processor = AudioProcessor()
   data_processor = DataProcessor()
-  # questions = questions(processed_data_file_path, processed_label_file_path, model_weights_path, model_params_path)
+  questions_class = questions(processed_data_file_path, processed_label_file_path, model_path)
 
 
   # Ask the user some questions
-  # load_saved_model, should_train, learning_rate, batch_size, epochs, load_saved_training_data = questions.ask()
+  load_saved_model, should_train, epochs, load_saved_training_data = questions_class.ask()
 
 
   # Load the data
-  # if load_saved_training_data:
-  #   print("Loading processed data")
-  #   data = np.load(processed_data_file_path)
-  #   labels = np.load(processed_label_file_path)
-  # else:
-  data, labels = data_processor.load_data(data_files_path, label_files_path)
-  np.save(processed_data_file_path, data)
-  np.save(processed_label_file_path, labels)
+  x_train = [0]
+  y_train = [0]
 
-  x_train, y_train = data, labels
+  if should_train:
+    if not load_saved_training_data:
+      print("Processing data")
+      data, labels = data_processor.load_data(data_files_path, label_files_path)
+      print("Saving processed data")
+      np.save(processed_data_file_path, data)
+      np.save(processed_label_file_path, labels)
+    else:
+      print("Loading processed data")
+      data = np.load(processed_data_file_path)
+      labels = np.load(processed_label_file_path)
+
+    x_train, y_train = data, labels
 
 
 
   # Train the model
   print("Training the model")
-  trainer = train.trainer(x_train, y_train, x_train, y_train)
-  trainer.run()
+  trainer = train.trainer(x_train[0:2000], y_train[0:2000], x_train[0:1], y_train[0:1])
+  gen_1, gen_2 = trainer.run(load_saved_model, should_train, epochs)
   print("Training done")
 
+  predict_files_path = "./predict/input"
+  predict_data, _ = data_processor.load_data(data_file_path=predict_files_path)
 
-  # # predict_data = data[0][np.newaxis, ...]
-  # predict_data = data[0:8]
 
-  # # Predict the model
-  # predictions, laten_space = processor.generate(predict_data)
 
-  # # scale the predictions up
-  # predictions = predictions * 4
-  # print(f"min: {np.min(predictions)}, max: {np.max(predictions)}")
+  predictions = predict.predictionClass(gen_1, predict_data).predict()
 
-  # processor.save_audio(predictions, "./")
+  predictions = processor.convert_spectrogram_to_signal(predictions)
+
+  # scale the predictions up
+  print(f"min: {np.min(predictions)}, max: {np.max(predictions)}")
+
+  processor.save_audio(predictions, "./predict/output")
 
 if __name__ == "__main__":
   main()

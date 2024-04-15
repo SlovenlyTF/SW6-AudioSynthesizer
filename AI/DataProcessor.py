@@ -1,17 +1,23 @@
 import numpy as np
 from AudioProcessor import AudioProcessor
+import math
 
 class DataProcessor:
   def __init__(self):
     self.processor = AudioProcessor()
 
-  def load_data(self, data_file_path, label_file_path):
-    print()
-    print("---Loading train data---")
-    data = self.processor.create_spectrogram_from_dir(data_file_path)
-    print()
-    print("---Loading test labels---")
-    labels = self.processor.create_spectrogram_from_dir(label_file_path)
+  def load_data(self, data_file_path = None, label_file_path = None):
+    data = None
+    labels = None
+    
+    if data_file_path is not None:
+      print()
+      print("---Loading data---")
+      data = self.processor.create_spectrogram_from_dir(data_file_path)
+    if label_file_path is not None:
+      print()
+      print("---Loading labels---")
+      labels = self.processor.create_spectrogram_from_dir(label_file_path)
 
     data, labels = self.reshape_data(data, labels)
 
@@ -23,16 +29,20 @@ class DataProcessor:
 
   def reshape_data(self, data_1, labels_1):
     data = []
-    for i in range(len(data_1)):
-      for j in range(len(data_1[i])):
-        data.append(data_1[i][j])
+    if data_1 is not None:
+      print("Reshaping data")
+      for i in range(len(data_1)):
+        for j in range(len(data_1[i])):
+          data.append(data_1[i][j])
     data = np.array(data)
     data = data[..., np.newaxis]
 
     labels = []
-    for i in range(len(labels_1)):
-      for j in range(len(labels_1[i])):
-        labels.append(labels_1[i][j])
+    if labels_1 is not None:
+      print("Reshaping labels")
+      for i in range(len(labels_1)):
+        for j in range(len(labels_1[i])):
+          labels.append(labels_1[i][j])
     labels = np.array(labels)
     labels = labels[..., np.newaxis]
 
