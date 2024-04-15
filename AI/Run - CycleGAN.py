@@ -6,6 +6,8 @@ import os
 import numpy as np
 import tensorflow as tf
 from Cyclegan import predict
+import torch
+import datetime
 
 def main():
   physical_devices = tf.config.experimental.list_physical_devices('GPU')
@@ -22,13 +24,6 @@ def main():
   model_path = ["./model/genh.pth.tar", "./model/genz.pth.tar", "./model/critich.pth.tar", "./model/criticz.pth.tar"]
 
 
-  log_path = f"./predict/output_model/{datetime.datetime.now()}"
-  log_path = log_path.replace(" ", "_").replace(":", "-")
-  os.makedirs(log_path)
-  log_file = open(f"{log_path}/Log.txt", "a")
-  log = [log_path, log_file]
-
-
   processor = AudioProcessor()
   data_processor = DataProcessor()
   questions_class = questions(processed_data_file_path, processed_label_file_path, model_path)
@@ -37,6 +32,11 @@ def main():
   # Ask the user some questions
   load_saved_model, should_train, epochs, load_saved_training_data = questions_class.ask()
 
+  log_path = f"./predict/output_no_model/{datetime.datetime.now()}"
+  log_path = log_path.replace(" ", "_").replace(":", "-")
+  os.makedirs(log_path)
+  log_file = open(f"{log_path}/Log.txt", "a")
+  log = [log_path, log_file]
 
   # Load the data
   x_train = [0]
@@ -67,7 +67,18 @@ def main():
   predict_files_path = "./predict/input"
   predict_data, _ = data_processor.load_data(data_file_path=predict_files_path, log=log)
 
+  # predictions = []
+  # for i in range(predict_data.shape[0]):
+  #   np_arr = predict_data[i].reshape(1024, 128)
+  #   tensor = torch.from_numpy(np_arr)
+  #   if tensor.dtype == torch.int:
+  #     tensor = tensor.float()  # Convert integers to float if necessary
 
+  #   predictions.append(gen_1(tensor))
+    
+  # predictions = np.array(predictions)
+  # predictions = np.concatenate(predictions, axis=0)
+  # predictions = predictions[..., np.newaxis]
 
   predictions = predict.predictionClass(gen_1, predict_data).predict()
 
@@ -76,7 +87,7 @@ def main():
   # scale the predictions up
   print(f"min: {np.min(predictions)}, max: {np.max(predictions)}")
 
-  processor.save_audio(predictions, "log_path")
+  processor.save_audio(predictions, "predict/output_model/")
 
   log_file.close()
 

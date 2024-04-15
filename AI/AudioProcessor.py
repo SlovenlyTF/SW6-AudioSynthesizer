@@ -181,7 +181,7 @@ class AudioProcessor:
 
   
 
-  def convert_spectrogram_to_signal(self, spectrograms, log):
+  def convert_spectrogram_to_signal(self, spectrograms, log = None):
     spec = []
     for idx, spectrogram in enumerate(spectrograms):
       log_spectrogram = spectrogram[:, :, 0]
