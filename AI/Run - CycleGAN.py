@@ -22,6 +22,13 @@ def main():
   model_path = ["./model/genh.pth.tar", "./model/genz.pth.tar", "./model/critich.pth.tar", "./model/criticz.pth.tar"]
 
 
+  log_path = f"./predict/output_model/{datetime.datetime.now()}"
+  log_path = log_path.replace(" ", "_").replace(":", "-")
+  os.makedirs(log_path)
+  log_file = open(f"{log_path}/Log.txt", "a")
+  log = [log_path, log_file]
+
+
   processor = AudioProcessor()
   data_processor = DataProcessor()
   questions_class = questions(processed_data_file_path, processed_label_file_path, model_path)
@@ -58,18 +65,20 @@ def main():
   print("Training done")
 
   predict_files_path = "./predict/input"
-  predict_data, _ = data_processor.load_data(data_file_path=predict_files_path)
+  predict_data, _ = data_processor.load_data(data_file_path=predict_files_path, log=log)
 
 
 
   predictions = predict.predictionClass(gen_1, predict_data).predict()
 
-  predictions = processor.convert_spectrogram_to_signal(predictions)
+  predictions = processor.convert_spectrogram_to_signal(predictions, log=log)
 
   # scale the predictions up
   print(f"min: {np.min(predictions)}, max: {np.max(predictions)}")
 
-  processor.save_audio(predictions, "./predict/output")
+  processor.save_audio(predictions, "log_path")
+
+  log_file.close()
 
 if __name__ == "__main__":
   main()

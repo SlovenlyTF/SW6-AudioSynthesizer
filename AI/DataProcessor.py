@@ -6,20 +6,20 @@ class DataProcessor:
   def __init__(self):
     self.processor = AudioProcessor()
 
-  def load_data(self, data_file_path = None, label_file_path = None):
+  def load_data(self, data_file_path = None, label_file_path = None, log = None):
     data = None
     labels = None
     
     if data_file_path is not None:
       print()
       print("---Loading data---")
-      data = self.processor.create_spectrogram_from_dir(data_file_path)
+      data = self.processor.create_spectrogram_from_dir(data_file_path, log=log)
     if label_file_path is not None:
       print()
       print("---Loading labels---")
-      labels = self.processor.create_spectrogram_from_dir(label_file_path)
+      labels = self.processor.create_spectrogram_from_dir(label_file_path, log=log)
 
-    data, labels = self.reshape_data(data, labels)
+    data, labels = self.reshape_data(data, labels, log=log)
 
     labels = np.array(labels)
     data = np.array(data)
@@ -27,7 +27,7 @@ class DataProcessor:
     return data, labels
 
 
-  def reshape_data(self, data_1, labels_1):
+  def reshape_data(self, data_1, labels_1, log):
     data = []
     if data_1 is not None:
       print("Reshaping data")
@@ -47,6 +47,17 @@ class DataProcessor:
     labels = labels[..., np.newaxis]
 
     print(f"Data shape: {data.shape}, Labels shape: {labels.shape}")
+
+    if log is not None:
+      log[1].write("reshaping the data\n")
+      log[1].write(f"Data shape: {data.shape}, Labels shape: {labels.shape}\n")
+
+      if data_1 is not None:
+        log[1].write(f"Data min: {np.min(data)}, Data max: {np.max(data)}\n")
+      if labels_1 is not None:
+        log[1].write(f"Labels min: {np.min(labels)}, Labels max: {np.max(labels)}\n")
+      log[1].write("\n\n")
+
     return data, labels
 
 
