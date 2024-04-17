@@ -21,7 +21,7 @@ def main():
 
   processor = AudioProcessor()
   data_processor = DataProcessor()
-  log = True
+  log = False
 
   if log is True:
     log_path = f"./predict/output_model_log/{datetime.datetime.now()}"

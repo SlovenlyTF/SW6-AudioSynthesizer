@@ -31,8 +31,7 @@ def main():
 
 
   # Ask the user some questions
-  load_saved_model, should_train, epochs, load_saved_training_data = questions_class.ask()
-  log = True
+  load_saved_model, should_train, epochs, load_saved_training_data, log = questions_class.ask()
 
   if log is True:
     # Comment out the following lines to remove logging of data

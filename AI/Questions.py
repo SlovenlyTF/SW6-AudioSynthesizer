@@ -32,7 +32,9 @@ class questions:
       if os.path.exists(self.processed_data_file_path) and os.path.exists(self.processed_label_file_path):
         self.load_saved_training_data = self._load_saved_training_data()
 
-    return self.load_saved_model, self.should_train, self.epochs, self.load_saved_training_data
+    self.should_log = self._should_log()
+
+    return self.load_saved_model, self.should_train, self.epochs, self.load_saved_training_data, self.should_log
   
   
   def _learning_rate(self):
@@ -82,6 +84,24 @@ class questions:
     answer = inquirer.prompt(epochs_questions)
     return answer['epochs']
   
+  def _should_log(self):
+    should_log_questions = [
+      inquirer.List(
+        "should_log",
+        message="Should log results and inbetween steps?",
+        choices=['Yes', 'No'],
+      ),
+    ]
+
+    def switch(x):
+      return {
+          'Yes': True,
+          'No': False,
+      }[x]
+    answer = inquirer.prompt(should_log_questions)
+    answer = switch(answer['should_log'])
+    return answer
+
 
   def _should_train(self):
     should_train_questions = [

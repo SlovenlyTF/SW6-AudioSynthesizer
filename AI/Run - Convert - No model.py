@@ -9,7 +9,7 @@ def main():
 
   processor = AudioProcessor()
   data_processor = DataProcessor()
-  log = True
+  log = False
 
   if log is True:
     # Comment out the following lines to remove logging of data
