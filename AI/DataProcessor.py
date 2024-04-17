@@ -6,6 +6,17 @@ class DataProcessor:
   def __init__(self):
     self.processor = AudioProcessor()
 
+  def load_data_from_signal(self, signal, sr, log = None):
+    data = None
+    labels = None
+
+    data = self.processor.file_processor(signal, sr, log=log)
+
+    data, _ = self.reshape_data(data, labels, log=log)
+
+    data = np.array(data)    
+    return data
+
   def load_data(self, data_file_path = None, label_file_path = None, log = None):
     data = None
     labels = None

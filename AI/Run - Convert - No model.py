@@ -9,30 +9,28 @@ def main():
 
   processor = AudioProcessor()
   data_processor = DataProcessor()
+  log = True
 
-  log_path = f"./predict/output_no_model/{datetime.datetime.now()}"
-  log_path = log_path.replace(" ", "_").replace(":", "-")
-  os.makedirs(log_path)
-  log_file = open(f"{log_path}/Log.txt", "a")
-  log = [log_path, log_file]
-
-
-  # Load the data
-  x_train = [0]
-  y_train = [0]
+  if log is True:
+    # Comment out the following lines to remove logging of data
+    log_path = f"./predict/output_model_log/{datetime.datetime.now()}"
+    log_path = log_path.replace(" ", "_").replace(":", "-")
+    os.makedirs(log_path)
+    log_file = open(f"{log_path}/Log.txt", "a")
+    log = [log_path, log_file]
+  else:
+    log = None
 
 
   predict_files_path = "./predict/input"
   predict_data, _ = data_processor.load_data(data_file_path=predict_files_path, log=log)
 
-  predictions = processor.convert_spectrogram_to_signal(predict_data, log=log)
+  prediction_signal = processor.convert_spectrogram_to_signal(predict_data, log=log)
 
-  predictions = predictions * 4
+  prediction_signal = prediction_signal * 4
+  print(f"min: {np.min(prediction_signal)}, max: {np.max(prediction_signal)}")
 
-  # scale the predictions up
-  print(f"min: {np.min(predictions)}, max: {np.max(predictions)}")
-
-  processor.save_audio(predictions, log_path)
+  processor.save_audio(prediction_signal, log_path)
 
   log_file.close()
 

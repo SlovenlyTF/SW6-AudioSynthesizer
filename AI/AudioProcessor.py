@@ -78,8 +78,14 @@ class AudioProcessor:
     fig.savefig(f"{log[0]}/{name}.png")
 
 
-  def _file_processor(self, file_path, log):
-    signal = self.load_signal(file_path, log=log)
+  def file_processor(self, file_path = None, signal = None, sr = None, log = None):
+    
+    if signal is None:
+      signal = self.load_signal(file_path, log=log)
+    else:
+      if sr != self.sample_rate:
+        signal = librosa.resample(signal, sr, self.sample_rate)
+
     segments = self.split_signal(signal, self.duration, self.sample_rate)
 
     if log is not None:
@@ -108,12 +114,11 @@ class AudioProcessor:
       spectrograms[i] = self.normalizer(spectrograms[i], i, log=log)
     return spectrograms
 
-  
   def create_spectrogram_from_dir(self, dir_path, log):
     spectrograms = []
     for i, file in enumerate(os.listdir(dir_path)):
       file_path = os.path.join(dir_path, file)
-      spectrogram = self._file_processor(file_path, log=log)
+      spectrogram = self.file_processor(file_path = file_path, log=log)
       spectrograms.append(spectrogram)
       print(f"({i + 1} of {len(os.listdir(dir_path))}) Processed: {file}")
     return spectrograms
@@ -122,6 +127,7 @@ class AudioProcessor:
   def save_audio(self, signal, file_path):
     file_path_name = os.path.join(file_path, "generated_audio.wav")
     sf.write(file_path_name, signal, self.sample_rate)
+    sf.write("./predict/output/generated_audio.wav", signal, self.sample_rate)
     print(f"Audio saved at {file_path}")
 
 

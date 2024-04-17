@@ -27,7 +27,7 @@ from Cyclegan import gen_model
 import numpy as np
 
 class trainer:
-    def __init__(self, train_hum_numpy_array, train_music_numpy_array, val_hum_numpy_array, val_music_numpy_array):
+    def __init__(self, train_hum_numpy_array = [0], train_music_numpy_array = [0], val_hum_numpy_array = [0], val_music_numpy_array = [0]):
         self.train_hum_numpy_array = train_hum_numpy_array
         self.train_music_numpy_array = train_music_numpy_array
 
