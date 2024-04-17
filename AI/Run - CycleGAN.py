@@ -27,11 +27,16 @@ def main():
 
   processor = AudioProcessor()
   data_processor = DataProcessor()
-  questions_class = questions(processed_data_file_path, processed_label_file_path, model_path)
+  # questions_class = questions(processed_data_file_path, processed_label_file_path, model_path)
 
 
   # Ask the user some questions
-  load_saved_model, should_train, epochs, load_saved_training_data, log = questions_class.ask()
+  # load_saved_model, should_train, epochs, load_saved_training_data, log = questions_class.ask()
+  load_saved_model = False
+  should_train = True
+  epochs = 100
+  load_saved_training_data = False
+  log = True
 
   if log is True:
     # Comment out the following lines to remove logging of data
