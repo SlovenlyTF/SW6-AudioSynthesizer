@@ -35,7 +35,7 @@ def main():
   load_saved_model = False
   should_train = True
   epochs = 100
-  load_saved_training_data = True
+  load_saved_training_data = False
   log = True
 
   if log is True:
