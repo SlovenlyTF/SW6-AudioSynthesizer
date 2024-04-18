@@ -106,9 +106,9 @@ class trainer:
             g_scaler.step(opt_gen)
             g_scaler.update()
 
-            if idx % 50 == 0:
-                save_image(fake_hum * 0.5 + 0.5, f"training_images_hum/epoch_{epoch_num}_index_{idx}.png")
-                save_image(fake_music * 0.5 + 0.5, f"training_images_music/epoch_{epoch_num}_index_{idx}.png")
+            # if idx % 50 == 0:
+            #     save_image(fake_hum * 0.5 + 0.5, f"training_images_hum/epoch_{epoch_num}_index_{idx}.png")
+            #     save_image(fake_music * 0.5 + 0.5, f"training_images_music/epoch_{epoch_num}_index_{idx}.png")
 
             loop.set_postfix(H_real=H_reals / (idx + 1), H_fake=H_fakes / (idx + 1))
 
