@@ -1,0 +1,6 @@
+flask
+pydub
+waitress
+soundfile
+librosa
+matplotlib

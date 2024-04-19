@@ -103,3 +103,8 @@ def post_to_sine():
 @app.route('/bucket/<path:path>')
 def send_report(path):
     return send_from_directory(BUCKET_DIR_NAME, path)
+
+
+# Create the app for use with waitress
+def create_app():
+    return app

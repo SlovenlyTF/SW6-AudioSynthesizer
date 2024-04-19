@@ -1,8 +1,36 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'pages/home.dart';
+import 'pages/archive.dart';
+import 'utilities/file_system.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-void main() {
+void main() async {
+  bool isInitialized = await initialize();
+  if(!isInitialized) {
+    print('Failed to initialize');
+    return;
+  }
+
   runApp(const MyApp());
+}
+
+Future<bool> initialize() async {
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // Ensure archive directory exists
+    var archivePath = await getArchivePath();
+    var arciveDir = Directory(archivePath);
+    if(!arciveDir.existsSync()) arciveDir.createSync();
+
+    print('DA FING IS NAO INITIALISED MAN!!!!');
+    return true;
+  } catch (error) {
+    print('FAILED TO INITIALIZE WITH ERROR: $error');
+    return false;
+  }
 }
 
 // Define your custom color scheme
@@ -28,7 +56,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData.from(colorScheme: sonicColorSchemeDark),
+      theme: ThemeData(
+        colorScheme: sonicColorSchemeDark,
+        fontFamily: GoogleFonts.dmSans().fontFamily,
+      ),
       home: const MainPage(title: 'On THAT Note...'),
     );
   }
@@ -46,15 +77,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   // TODO: Move navbar to separate widget
   int _selectedPage = 0;
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static const List<Widget> _widgetOptions = <Widget>[
     HomePage(),
-    // TODO: Implement archive page
-    Text(
-      'Index 1: Archive',
-      style: optionStyle,
-    ),
+    ArchivePage(),
   ];
 
   void _onNavTapped(int index) {

@@ -3,9 +3,12 @@ import 'package:flutter_app/states/generation_option_state.dart';
 import 'package:flutter_app/states/generation_state.dart';
 import 'package:flutter_app/states/recording_state.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_app/states/audio_saved_state.dart';
 
 class GenerateButton extends StatefulWidget {
-  const GenerateButton({super.key});
+  const GenerateButton({super.key, this.size = 75});
+
+  final double size;
 
   @override
   State<GenerateButton> createState() => _GenerateButtonState();
@@ -23,16 +26,16 @@ class _GenerateButtonState extends State<GenerateButton> {
   @override
   Widget build(BuildContext context) {
     // Perhaps we can use Provider.of for the generating state?
-    return Consumer3<RecordingState,GenerationState,GenerationOptionState>(
-      builder: (context, recordingState, generationState, generationOptions, child) {
+    return Consumer4<RecordingState,GenerationState,GenerationOptionState,AudioSavedState>(
+      builder: (context, recordingState, generationState, generationOptions, audioSavedState, child) {
         return ElevatedButton(
           // onPressed is null if generation is not allowed to disable the button
           onPressed: !canGenerate(recordingState.getIsRecording) ? null : () {
-            generationState.generateAudio(generationOptions);
+            generationState.generateAudio(generationOptions, audioSavedState);
           },
           style: ElevatedButton.styleFrom(
             shape: const CircleBorder(),
-            minimumSize: const Size(75, 75),
+            minimumSize: Size(widget.size, widget.size),
             backgroundColor: generationState.getGenerating ? Colors.cyan[200] : Colors.cyan[300],
           ),
           child: const Icon(Icons.multitrack_audio_rounded, color: Colors.white, size: 30),

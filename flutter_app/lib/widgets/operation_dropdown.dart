@@ -20,7 +20,6 @@ class _OperationDropdownState extends State<OperationDropdown> {
     return  DropdownMenu<OperationLabel>(
       initialSelection: OperationLabel.flipAudio,
       controller: operationController,
-      requestFocusOnTap: true,
       label: const Text('Operation', style: TextStyle(color: Colors.white)),
       textStyle: const TextStyle(
         color: Colors.white,

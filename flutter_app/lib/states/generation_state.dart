@@ -1,10 +1,19 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/states/generation_option_state.dart';
 import 'package:flutter_app/utilities/file_system.dart';
 import 'package:flutter_app/utilities/notifications.dart';
+import 'package:flutter_app/states/audio_saved_state.dart';
 
 class GenerationState extends ChangeNotifier {
+
+  GenerationState() {
+    getTempGeneratedPath().then((path) {
+      setFileExists(File(path).existsSync());
+    });
+  }
+
   // Using a bool for now, perhaps refactor to an enum in the future
   bool _isGenerating = false;
   bool get getGenerating => _isGenerating;
@@ -20,8 +29,16 @@ class GenerationState extends ChangeNotifier {
     _haveReloadedAudioplayer = value;
   }
 
+  bool _fileExists = false;
+  bool get getFileExists => _fileExists;
+  void setFileExists(bool value) {
+    _fileExists = value;
+    notifyListeners();
+  }
+
+
   // TODO: Split function
-  void generateAudio(GenerationOptionState generationOptions) async {
+  void generateAudio(GenerationOptionState generationOptions, AudioSavedState audioSavedState) async {
     try {
       setGenerating(true);
       // showDebugToast('Sending audio to server');
@@ -48,12 +65,13 @@ class GenerationState extends ChangeNotifier {
     } finally {
       setGenerating(false);
       setHaveReloadedAudioplayer(false);
+      audioSavedState.setIsAudioSaved(false);
     }
   }
 
   Future<String> sendRecording(OperationLabel operation) async {
     // Define paths
-    var url = Uri.http('192.168.166.156:5000', 'api/${operation.endpoint}');
+    var url = Uri.http('10.0.2.2:5000', 'api/${operation.endpoint}');
     String filePath = await getTempRecordingPath();
 
     // Prepare request
@@ -92,8 +110,16 @@ class GenerationState extends ChangeNotifier {
     dio.options.connectTimeout = const Duration(seconds: 30);
 
     // Send request
-    var response = await dio.download(url, filePath);
-    
-    return response.statusCode == 200;
+    try {
+      var response = await dio.download(url, filePath);
+      var isSuccessful = response.statusCode == 200;
+      if(isSuccessful) {
+        setFileExists(true);
+      }
+      return isSuccessful;
+    } catch (error) {
+      print('Error: $error');
+      return false;
+    }
   }
 }
