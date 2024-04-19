@@ -19,5 +19,5 @@ def midi_to_wav(midi_file, output_dir):
 output_dir = os.path.join(os.getcwd(), 'audio_bucket')
 
 # Set toms_diner1.mid as the input MIDI file
-midi_file = os.path.join(output_dir, 'toms_diner1.mid')
+midi_file = os.path.join(os.getcwd(), 'toms_diner1.mid')
 wav_file = midi_to_wav(midi_file, output_dir)
