@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/states/generation_option_state.dart';
 import 'package:flutter_app/states/generation_state.dart';
+import 'package:flutter_app/states/last_generation.dart';
 import 'package:flutter_app/states/recording_state.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/states/audio_saved_state.dart';
@@ -18,20 +19,24 @@ class _GenerateButtonState extends State<GenerateButton> {
 
   bool generating = false;
 
-  bool canGenerate(bool isRecording) {
-    // TODO: Check if audio recording exists
-    return !isRecording;
+  bool canGenerate(RecordingState recordingState, String previousOperation, String selectedOperation) {
+    bool isRecording = recordingState.getIsRecording;
+    bool recordingExists = recordingState.getRecordingExists;
+    bool newRecording = recordingState.getNewRecording;
+    print('CanGen Prev Op: $previousOperation, Sel Op: $selectedOperation');
+    print('CanGen isRec: $isRecording, recExists: $recordingExists, newRec: $newRecording');
+    return !isRecording && recordingExists && (newRecording || (previousOperation != selectedOperation));
   }
 
   @override
   Widget build(BuildContext context) {
     // Perhaps we can use Provider.of for the generating state?
-    return Consumer4<RecordingState,GenerationState,GenerationOptionState,AudioSavedState>(
-      builder: (context, recordingState, generationState, generationOptions, audioSavedState, child) {
+    return Consumer5<RecordingState,GenerationState,GenerationOptionState,AudioSavedState,LastGeneration>(
+      builder: (context, recordingState, generationState, generationOptions, audioSavedState, lastGeneration, child) {
         return ElevatedButton(
           // onPressed is null if generation is not allowed to disable the button
-          onPressed: !canGenerate(recordingState.getIsRecording) ? null : () {
-            generationState.generateAudio(generationOptions, audioSavedState);
+          onPressed: !canGenerate(recordingState, lastGeneration.getPreviousOperation, generationOptions.getOperation.label) ? null : () {
+            generationState.generateAudio(generationOptions, audioSavedState, generationOptions, recordingState, lastGeneration);
           },
           style: ElevatedButton.styleFrom(
             shape: const CircleBorder(),

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/states/generation_option_state.dart';
+import 'package:flutter_app/states/last_generation.dart';
+import 'package:flutter_app/states/recording_state.dart';
 import 'package:flutter_app/utilities/file_system.dart';
 import 'package:flutter_app/utilities/notifications.dart';
 import 'package:flutter_app/states/audio_saved_state.dart';
@@ -36,9 +38,17 @@ class GenerationState extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _audioHasGenerated = false;
+  bool get getAudioHasGenerated => _audioHasGenerated;
+  void setAudioHasGenerated(bool value) {
+    _audioHasGenerated = value;
+    notifyListeners();
+  }
 
   // TODO: Split function
-  void generateAudio(GenerationOptionState generationOptions, AudioSavedState audioSavedState) async {
+  void generateAudio(GenerationOptionState generationOptions, AudioSavedState audioSavedState, 
+                      GenerationOptionState generationOptionState, RecordingState recordingState,
+                      LastGeneration lastGeneration) async {
     try {
       setGenerating(true);
       // showDebugToast('Sending audio to server');
@@ -66,6 +76,8 @@ class GenerationState extends ChangeNotifier {
       setGenerating(false);
       setHaveReloadedAudioplayer(false);
       audioSavedState.setIsAudioSaved(false);
+      lastGeneration.setPreviousOperation(generationOptionState.getOperation.label);
+      recordingState.setNewRecording(false);
     }
   }
 

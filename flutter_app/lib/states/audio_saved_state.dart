@@ -19,7 +19,6 @@ class AudioSavedState extends ChangeNotifier {
 
   Future<void> setIsAudioSaved(bool value) async {
     _isAudioSaved = value;
-    print('SETISAUDIOSAVED: $value');
     await _prefs.setBool('_isAudioSaved', value);
     notifyListeners();
   }

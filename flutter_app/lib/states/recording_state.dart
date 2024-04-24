@@ -2,18 +2,48 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/utilities/file_system.dart';
 import 'package:flutter_app/utilities/notifications.dart';
 import 'package:record/record.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RecordingState extends ChangeNotifier {
-  // Using a bool for now, perhaps refactor to an enum in the future
-  bool _isRecording = false;
+  late SharedPreferences _prefs;
 
+  RecordingState() {
+    initialize();
+  }
+
+    // Using a bool for now, perhaps refactor to an enum in the future
+  bool _isRecording = false;
   bool get getIsRecording => _isRecording;
+  bool _recordingExists = false;
+  bool get getRecordingExists => _recordingExists;
+  bool _newRecording = false;
+  bool get getNewRecording => _newRecording;
+
+  Future<void> initialize() async {
+    _prefs = await SharedPreferences.getInstance();
+    _recordingExists = _prefs.getBool('_recordingExists') ?? false;
+    _newRecording = _prefs.getBool('_newRecording') ?? false;
+    notifyListeners();
+  }
 
   // TODO: Was a global variable, now it's here, fucking dumb x2
   final record = AudioRecorder();
 
-  void setIsRecording(bool value) {
+  Future<void> setIsRecording(bool value) async {
     _isRecording = value;
+    await _prefs.setBool('_isRecording', value);
+    notifyListeners();
+  }
+
+  void setRecordingExists(bool value) async {
+    _recordingExists = value;
+    await _prefs.setBool('_recordingExists', value);
+    notifyListeners();
+  }
+
+  void setNewRecording(bool value) async {
+    _newRecording = value;
+    await _prefs.setBool('_newRecording', value);
     notifyListeners();
   }
 
@@ -37,6 +67,8 @@ class RecordingState extends ChangeNotifier {
   void stopRecording() async {
     await record.stop();
     setIsRecording(false);
+    setRecordingExists(true);
+    setNewRecording(true);
     // showDebugToast("Recording stopped");
   }
 

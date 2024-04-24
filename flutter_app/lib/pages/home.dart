@@ -10,6 +10,7 @@ import 'package:flutter_app/states/generation_state.dart';
 import 'package:flutter_app/states/recording_state.dart';
 import 'package:flutter_app/utilities/file_system.dart';
 import 'package:flutter_app/states/audio_saved_state.dart';
+import 'package:flutter_app/states/last_generation.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -34,6 +35,9 @@ class _HomePageState extends State<HomePage> {
         ),
         ChangeNotifierProvider<AudioSavedState>(
           create: (context) => AudioSavedState(),
+        ),
+        ChangeNotifierProvider<LastGeneration>(
+          create: (context) => LastGeneration(),
         ),
       ],
       child: Scaffold(
