@@ -23,8 +23,6 @@ class _GenerateButtonState extends State<GenerateButton> {
     bool isRecording = recordingState.getIsRecording;
     bool recordingExists = recordingState.getRecordingExists;
     bool newRecording = recordingState.getNewRecording;
-    print('CanGen Prev Op: $previousOperation, Sel Op: $selectedOperation');
-    print('CanGen isRec: $isRecording, recExists: $recordingExists, newRec: $newRecording');
     return !isRecording && recordingExists && (newRecording || (previousOperation != selectedOperation));
   }
 
