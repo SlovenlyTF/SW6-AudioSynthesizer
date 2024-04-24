@@ -1,8 +1,9 @@
 from midi2audio import FluidSynth
 from pydub import AudioSegment
 from os import path, listdir, makedirs
+from pathlib import Path
 
-SOUNDFONT_DIR = path.join(path.dirname(__file__), 'soundfonts')
+SOUNDFONT_DIR = Path(path.dirname(__file__)) / 'soundfonts'
 
 # Get all filenames in SOUNDFONT_DIR
 SOUNDFONTS = [f for f in listdir(SOUNDFONT_DIR) if path.isfile(SOUNDFONT_DIR / f)]
