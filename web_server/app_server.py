@@ -6,7 +6,6 @@ import uuid
 from to_sine import audio_to_sine, audio_segment_to_samples
 from to_midi import audio_to_midi
 from midi_to_wav import midi_to_wav, get_soundfont_path
-from os import path
 
 app = Flask(__name__)
 
