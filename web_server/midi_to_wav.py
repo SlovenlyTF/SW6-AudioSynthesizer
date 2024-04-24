@@ -30,22 +30,22 @@ def midi_to_wav(midi_file, output_dir, soundfont, volume_change=20):
 
 
 def get_soundfont_path(request):
-  if 'soundfont' not in request.files:
-    return {
+  if 'soundfont' not in request.values:
+    return None, {
       'status': 'fail',
       'data': {
         'message': 'No soundfont provided'
       }
     }, 400
   
-  soundfont = request.files['soundfont']
+  soundfont = request.values['soundfont']
   
   if soundfont not in SOUNDFONTS:
-    return {
+    return None, {
       'status': 'fail',
       'data': {
         'message': f'Invalid soundfont provided: {soundfont}'
       }
     }, 400
   
-  return SOUNDFONT_DIR / soundfont
+  return SOUNDFONT_DIR / soundfont, None, None

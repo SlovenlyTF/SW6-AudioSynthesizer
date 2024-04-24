@@ -6,6 +6,8 @@ import uuid
 from to_sine import audio_to_sine, audio_segment_to_samples
 from to_midi import audio_to_midi
 from midi_to_wav import midi_to_wav, get_soundfont_path
+from werkzeug.utils import secure_filename
+import tempfile
 
 app = Flask(__name__)
 
@@ -109,29 +111,40 @@ def post_to_sine():
 
 
 # Perhaps a bit too mouthy about where errors occur
-@app.post('/api/to-midi-wav')
+@app.post('/api/to-midi')
 def post_to_midi():
     # Get input file
     input_file, error_message, error_code = get_input_file(request)
     if error_message:
         return error_message, error_code
     
+    # Get soundfont
+    soundfont_path, error_message, error_code = get_soundfont_path(request)
+    if error_message:
+        return error_message, error_code
+    
     try:
-        soundfont_path = get_soundfont_path(request)
+        # Create temporary file
+        temp_file = tempfile.NamedTemporaryFile(suffix='.wav')
+        input_file.save(temp_file.name)
+        
         # Convert audio to midi
         file_name_base = str(uuid.uuid4())
-        midi_path = audio_to_midi(input_file, BUCKET_DIR / f'{file_name_base}.mid')
-    except:
+        midi_path = str(BUCKET_DIR / f'{file_name_base}.mid')
+        # Right now audio_to_midi saves midi in bucket, we can serve it or remove it
+        audio_to_midi(temp_file.name, midi_path)
+        temp_file.close()
+    except Exception as e:
         return {
             'status': 'error',
-            'message': 'Failed to convert audio to midi.',
+            'message': f'Failed to convert audio to midi.',
         }, 500
     
     try:
         # Convert midi to wav
         midi_to_wav(midi_path, BUCKET_DIR, soundfont_path)
         result_url = f'{request.url_root}bucket/{file_name_base}.wav' # Bad but I can't be arsed rn
-    except:
+    except Exception as e:
         return {
             'status': 'error',
             'message': 'Failed to convert midi to wav.',
