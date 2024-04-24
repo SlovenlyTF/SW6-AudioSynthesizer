@@ -238,20 +238,20 @@ class Converter:
                 self._increment_progress()
 
 
-if __name__ == "__main__":
+def audio_to_midi(infile, outfile):
     process = Converter(
-            infile='test.wav',
-            outfile='test.mid',
-            time_window=30,
-            activation_level=0.0,
-            condense=True,
-            condense_max=True,
-            max_note_length=0,
-            note_count=0,
-            transpose=0,
-            pitch_set=[],
-            pitch_range=None,
-            progress=None,
-            bpm=60,
-        )
+        infile=infile,
+        outfile=outfile,
+        time_window=50,
+        activation_level=0.05,
+        condense=True,
+        condense_max=False,
+        max_note_length=500,
+        note_count=3,
+        transpose=-10,
+        pitch_set=[],
+        pitch_range=None,
+        progress=None,
+        bpm=120,
+    )
     process.convert()
