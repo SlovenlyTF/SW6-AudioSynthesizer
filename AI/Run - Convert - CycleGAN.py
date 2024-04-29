@@ -21,7 +21,7 @@ def main():
 
   processor = AudioProcessor()
   data_processor = DataProcessor()
-  log = False
+  log = True
 
   if log is True:
     log_path = f"./predict/output_model_log/{datetime.datetime.now()}"
@@ -36,7 +36,7 @@ def main():
   # Train the model
   print("Load the model")
   trainer = train.trainer()
-  gen_1, gen_2 = trainer.run(True, False, epochs)
+  gen_1, gen_2 = trainer.run(True, False, 0)
   print("Loading done")
 
   predict_files_path = "./predict/input"
@@ -55,9 +55,10 @@ def main():
   prediction_signal = processor.convert_spectrogram_to_signal(predictions, log=log)
   print(f"min: {np.min(prediction_signal)}, max: {np.max(prediction_signal)}")
 
-  processor.save_audio(prediction_signal, log_path)
+  if log is not None:
+    processor.save_audio(prediction_signal, log[0])
 
-  log_file.close()
+    log[1].close()
 
 if __name__ == "__main__":
   main()

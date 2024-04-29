@@ -30,9 +30,11 @@ def main():
   # prediction_signal = prediction_signal * 4
   print(f"min: {np.min(prediction_signal)}, max: {np.max(prediction_signal)}")
 
-  processor.save_audio(prediction_signal, log[0])
+  if log is not None:
+    processor.save_audio(prediction_signal, log[0])
 
-  log[1].close()
+    log[1].close()
+  
 
 if __name__ == "__main__":
   main()
