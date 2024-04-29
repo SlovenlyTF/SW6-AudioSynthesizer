@@ -201,7 +201,8 @@ class AudioProcessor:
     if spec_full.dtype == np.float16:
       spec_full = spec_full.astype(np.float32)
 
-    signal = librosa.istft(spec_full, hop_length=self.hop_length)
+    # signal = librosa.istft(spec_full, hop_length=self.hop_length)
+    signal = librosa.griffinlim(spec_full, hop_length=self.hop_length)
 
     if log is not None:
       self._plot_spectrogram_from_signal(signal, False, "denomalized_ISTFT_full_signal", log)
@@ -209,6 +210,7 @@ class AudioProcessor:
       plot_segments = spec[0:-1]
       plot_segments = np.concatenate(plot_segments, axis=1)
       self._plot_spectrogram_from_signal(plot_segments, True, "denomalize_no_pad_segments", log)
+      
 
       log[1].write(f"Denomalized full signal\n")
       log[1].write(f"Signal min: {signal.min()}, Signal max: {signal.max()}\n")

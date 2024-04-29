@@ -1,0 +1,66 @@
+Pre_nomalize_Full signal of file ./predict/input\Hum.wav
+Signal min: -0.21053197979927063, Signal max: 0.12874974310398102
+Length of signal: 154062
+Duration of signal: 6.986938775510204
+Number of segments: 3
+Duration of last segment: 1.046938775510204
+
+
+Spectrogram min: 3.6356999633113674e-09, Spectrogram max: 31.267253875732422
+Log Spectrogram min: -50.09820556640625, Log Spectrogram max: 29.90179443359375
+
+
+Spectrogram min: 1.225835544182985e-09, Spectrogram max: 55.21480941772461
+Log Spectrogram min: -45.15888977050781, Log Spectrogram max: 34.84111022949219
+
+
+Spectrogram min: 0.0, Spectrogram max: 58.30817794799805
+Log Spectrogram min: -44.68540954589844, Log Spectrogram max: 35.31459045410156
+
+
+Normalization of segment 1
+Signal min: -50.09820556640625, Signal max: 29.90179443359375
+Self.signal min: -100, Self.signal max: 100
+Normalized signal min: 0.24950897693634033, Normalized signal max: 0.6495089530944824
+
+
+Normalization of segment 2
+Signal min: -45.15888977050781, Signal max: 34.84111022949219
+Self.signal min: -100, Self.signal max: 100
+Normalized signal min: 0.2742055654525757, Normalized signal max: 0.6742055416107178
+
+
+Normalization of segment 3
+Signal min: -44.68540954589844, Signal max: 35.31459045410156
+Self.signal min: -100, Self.signal max: 100
+Normalized signal min: 0.27657294273376465, Normalized signal max: 0.6765729784965515
+
+
+reshaping the data
+Data shape: (3, 1024, 128, 1), Labels shape: (0, 1)
+Data min: 0.24950897693634033, Data max: 0.6765729784965515
+
+
+Denormalization of segment 1
+Normalized signal min: 0.24950897693634033, Normalized signal max: 0.6495089530944824
+Self.signal min: -100, Self.signal max: 100
+Denormalized signal min: -50.09820556640625, Denormalized signal max: 29.90179443359375
+
+
+Denormalization of segment 2
+Normalized signal min: 0.2742055654525757, Normalized signal max: 0.6742055416107178
+Self.signal min: -100, Self.signal max: 100
+Denormalized signal min: -45.15888595581055, Denormalized signal max: 34.84111022949219
+
+
+Denormalization of segment 3
+Normalized signal min: 0.27657294273376465, Normalized signal max: 0.6765729784965515
+Self.signal min: -100, Self.signal max: 100
+Denormalized signal min: -44.68540954589844, Denormalized signal max: 35.31459045410156
+
+
+Denomalized full signal
+Signal min: -0.02931908704340458, Signal max: 0.049603525549173355
+Length of signal: 196096
+
+
