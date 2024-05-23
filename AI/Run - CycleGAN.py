@@ -19,8 +19,8 @@ def main():
   data_files_path = "./data/train/hum"
   label_files_path = "./data/train/music"
 
-  processed_data_file_path = "./data/processed_data.npy"
-  processed_label_file_path = "./data/processed_label.npy"
+  processed_data_file_path = "./data/processed/data/"
+  processed_label_file_path = "./data/processed/label/"
 
   model_path = ["./model/genh.pth.tar", "./model/genz.pth.tar", "./model/critich.pth.tar", "./model/criticz.pth.tar"]
 
@@ -57,12 +57,13 @@ def main():
       print("Processing data")
       data, labels = data_processor.load_data(data_files_path, label_files_path)
       print("Saving processed data")
-      np.save(processed_data_file_path, data)
-      np.save(processed_label_file_path, labels)
+      data_processor.save_data_in_chunks(processed_data_file_path, processed_label_file_path, data, labels, 1000)
+      data = data_processor.load_data_chunk(processed_data_file_path, 1)
+      labels = data_processor.load_label_chunk(processed_label_file_path, 1)
     else:
       print("Loading processed data")
-      data = np.load(processed_data_file_path)
-      labels = np.load(processed_label_file_path)
+      data = data_processor.load_data_chunk(processed_data_file_path, 1)
+      labels = data_processor.load_label_chunk(processed_label_file_path, 1)
 
     x_train, y_train = data, labels
 

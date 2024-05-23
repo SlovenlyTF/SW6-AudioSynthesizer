@@ -14,13 +14,13 @@ class DataProcessor:
 
     data, _ = self.reshape_data(data, labels, log=log)
 
-    data = np.array(data)    
+    data = np.array(data)
     return data
 
   def load_data(self, data_file_path = None, label_file_path = None, log = None):
     data = None
     labels = None
-    
+
     if data_file_path is not None:
       print()
       print("---Loading data---")
@@ -34,7 +34,7 @@ class DataProcessor:
 
     labels = np.array(labels)
     data = np.array(data)
-    
+
     return data, labels
 
 
@@ -80,3 +80,17 @@ class DataProcessor:
     data_test = data[num_train_samples:]
     labels_test = labels[num_train_samples:]
     return data_train, labels_train, data_test, labels_test
+
+  def save_data_in_chunks(self, data_file_path, label_file_path, data, labels, chunk_size = 1000):
+    for i in range(math.ceil(len(data) / chunk_size)):
+      np.save(data_file_path + i + ".npy", data[i*chunk_size:(i+1)*chunk_size])
+      np.save(label_file_path + i + ".npy", labels[i*chunk_size:(i+1)*chunk_size])
+    print("Data saved")
+
+  def load_data_chuck(self, data_file_path, chunk = 1):
+    data = np.load(data_file_path + chunk + ".npy")
+    return data
+
+  def load_label_chunk(self, label_file_path, chunk = 1):
+    labels = np.load(label_file_path + chunk + ".npy")
+    return labels
