@@ -74,7 +74,7 @@ class AudioProcessor:
     fig = plt.Figure()
     canvas = FigureCanvas(fig)
     ax = fig.add_subplot(111)
-    p = librosa.display.specshow(log_spectrogram, ax=ax, y_axis='log', x_axis='time')
+    p = librosa.display.specshow(log_spectrogram, ax=ax, y_axis='log', x_axis='time', cmap='magma')
     fig.savefig(f"{log[0]}/{name}.png")
 
 
