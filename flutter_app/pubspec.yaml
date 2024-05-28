@@ -37,7 +37,13 @@ dependencies:
   fluttertoast: ^8.2.4
   just_audio: ^0.9.36
   provider: ^6.1.2
-  
+  name_plus: ^0.0.3
+  share_plus: ^8.0.2
+  # For some reason, share_plus crashes the build process without file_selector explicitly in the pubspec...
+  file_selector: ^1.0.3
+  accordion: ^2.6.0
+  google_fonts: ^6.2.1
+  shared_preferences: ^2.2.3
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -18,9 +18,8 @@ class _OperationDropdownState extends State<OperationDropdown> {
     final generationOptions = Provider.of<GenerationOptionState>(context, listen: false);
 
     return  DropdownMenu<OperationLabel>(
-      initialSelection: OperationLabel.flipAudio,
+      initialSelection: OperationLabel.midiPiano,
       controller: operationController,
-      requestFocusOnTap: true,
       label: const Text('Operation', style: TextStyle(color: Colors.white)),
       textStyle: const TextStyle(
         color: Colors.white,
@@ -34,7 +33,7 @@ class _OperationDropdownState extends State<OperationDropdown> {
         color: Colors.white,
       ),
       onSelected: (OperationLabel? operation) {
-        generationOptions.setOperation(operation ?? OperationLabel.flipAudio);
+        generationOptions.setOperation(operation ?? OperationLabel.midiPiano);
       },
       dropdownMenuEntries: OperationLabel.values
           .map<DropdownMenuEntry<OperationLabel>>(

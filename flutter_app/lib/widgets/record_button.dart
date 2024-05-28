@@ -4,7 +4,9 @@ import 'package:flutter_app/states/recording_state.dart';
 import 'package:provider/provider.dart';
 
 class RecordButton extends StatefulWidget {
-  const RecordButton({super.key});
+  const RecordButton({super.key, this.size = 75});
+
+  final double size;
 
   @override
   State<RecordButton> createState() => _RecordButtonState();
@@ -26,7 +28,7 @@ class _RecordButtonState extends State<RecordButton> {
           },
           style: ElevatedButton.styleFrom(
             shape: const CircleBorder(),
-            minimumSize: const Size(75, 75),
+            minimumSize: Size(widget.size, widget.size),
             backgroundColor: recordingState.getIsRecording ? Colors.red : Colors.blue[600],
           ),
           child: recordingState.getIsRecording ?

@@ -1,0 +1,9 @@
+flask
+pydub
+waitress
+soundfile
+librosa
+matplotlib
+python3_midi
+midi2audio
+werkzeug

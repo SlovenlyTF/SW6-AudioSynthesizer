@@ -4,11 +4,15 @@ from librosa import load as load_wav
 from pathlib import Path
 import uuid
 from to_sine import audio_to_sine, audio_segment_to_samples
+from to_midi import audio_to_midi
+from midi_to_wav import midi_to_wav, get_soundfont_path
+from werkzeug.utils import secure_filename
+import tempfile
 
 app = Flask(__name__)
 
-# Constantss
-BUCKET_DIR_NAME = 'audio_bucket'
+# Constants
+BUCKET_DIR = Path('audio_bucket')
 # TODO: Fix content types and shit
 SUPPORTED_CONTENT_TYPES = ['audio/wav', 'audio/wave', 'application/octet-stream']
 
@@ -20,7 +24,7 @@ def generate_unique_filename():
 
 def save_wav_to_bucket(sr, data):
     file_name = generate_unique_filename()
-    file_path = Path(BUCKET_DIR_NAME) / file_name
+    file_path = BUCKET_DIR / file_name
     
     # Save audio to bucket and return link to the file
     with open(file_path, 'wb') as file:
@@ -31,7 +35,7 @@ def save_wav_to_bucket(sr, data):
 
 def save_pydub_generator_to_bucket(generator):
     file_name = generate_unique_filename()
-    file_path = Path(BUCKET_DIR_NAME) / file_name
+    file_path = BUCKET_DIR / file_name
     
     # Save audio to bucket and return link to the file
     generator.export(out_f=file_path, format="wav")
@@ -44,9 +48,9 @@ def get_index():
     return 'Hello, EchoPond!'
 
 
-def process_audio(operation):    
+def get_input_file(request):
     if 'audio' not in request.files:
-        return {
+        return None, {
             'status': 'fail',
             'data': {
                 'audio': 'No audio file uploaded.'
@@ -58,13 +62,20 @@ def process_audio(operation):
     # Return error if file type is not supported
     # TODO: Does this check the actual file or an http header?
     if input_file.content_type not in SUPPORTED_CONTENT_TYPES:
-        print(f'Unsupported Media Type "{input_file.content_type}".')
-        return {
+        return None, {
             'status': 'fail',
             'data': {
                 'mediaType': f'Unsupported Media Type "{input_file.content_type}".',
             }
         }, 415
+    
+    return input_file, None, None
+
+
+def process_audio(request, operation):
+    input_file, error_response, error_code = get_input_file(request)
+    if error_response:
+        return error_response, error_code
     
     # Extract audio from filet
     input_data, input_sr = load_wav(input_file.stream)
@@ -78,7 +89,7 @@ def process_audio(operation):
     except Exception as e:
         return {
             'status': 'error',
-            'message': f'Failed to save file to bucket.',
+            'message': 'Failed to save file to bucket.',
         }, 500
     
     return {
@@ -91,15 +102,70 @@ def process_audio(operation):
 
 @app.post('/api/flip-audio')
 def post_flip_audio():
-    return process_audio(lambda sr,data : (sr,data[::-1]))
+    return process_audio(request, lambda sr,data : (sr,data[::-1]))
 
 
 @app.post('/api/to-sine')
 def post_to_sine():
-    return process_audio(lambda sr,data : audio_segment_to_samples(audio_to_sine(sr, data)))
+    return process_audio(request, lambda sr,data : audio_segment_to_samples(audio_to_sine(sr, data)))
+
+
+# Perhaps a bit too mouthy about where errors occur
+@app.post('/api/to-midi')
+def post_to_midi():
+    # Get input file
+    input_file, error_message, error_code = get_input_file(request)
+    if error_message:
+        return error_message, error_code
+    
+    # Get soundfont
+    soundfont_path, error_message, error_code = get_soundfont_path(request)
+    if error_message:
+        return error_message, error_code
+    
+    try:
+        # Create temporary file
+        temp_file = tempfile.NamedTemporaryFile(suffix='.wav')
+        input_file.save(temp_file.name)
+        
+        # Convert audio to midi
+        file_name_base = str(uuid.uuid4())
+        midi_path = str(BUCKET_DIR / f'{file_name_base}.mid')
+        # Right now audio_to_midi saves midi in bucket, we can serve it or remove it
+        audio_to_midi(temp_file.name, midi_path)
+        temp_file.close()
+    except Exception as e:
+        return {
+            'status': 'error',
+            'message': f'Failed to convert audio to midi.',
+        }, 500
+    
+    try:
+        # Convert midi to wav
+        midi_to_wav(midi_path, BUCKET_DIR, soundfont_path)
+        result_url = f'{request.url_root}bucket/{file_name_base}.wav' # Bad but I can't be arsed rn
+    except Exception as e:
+        return {
+            'status': 'error',
+            'message': 'Failed to convert midi to wav.',
+        }, 500
+    
+    return {
+        'status': 'success',
+        'data': {
+            'resultUrl': result_url
+        }
+    }, 200
 
 
 # Safely host files in audio_bucket directory
 @app.route('/bucket/<path:path>')
 def send_report(path):
-    return send_from_directory(BUCKET_DIR_NAME, path)
+    return send_from_directory(BUCKET_DIR, path)
+
+
+# Create the app for use with waitress
+def create_app():
+    # Create bucket directory if it doesn't exist
+    BUCKET_DIR.mkdir(exist_ok=True)
+    return app

@@ -12,3 +12,8 @@ Future<String> getTempGeneratedPath() async {
   Directory appDocumentsDirectory = await getApplicationDocumentsDirectory();
   return '${appDocumentsDirectory.path}/ephemeral_generated.wav';
 }
+
+Future<String> getArchivePath() async {
+  Directory appDocumentsDirectory = await getApplicationDocumentsDirectory();
+  return '${appDocumentsDirectory.path}/archive';
+}
