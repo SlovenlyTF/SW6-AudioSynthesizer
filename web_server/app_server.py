@@ -166,4 +166,6 @@ def send_report(path):
 
 # Create the app for use with waitress
 def create_app():
+    # Create bucket directory if it doesn't exist
+    BUCKET_DIR.mkdir(exist_ok=True)
     return app

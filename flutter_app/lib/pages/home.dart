@@ -69,6 +69,7 @@ class _HomePageState extends State<HomePage> {
               // ACTION BUTTONS
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   RecordButton(),
                   GenerateButton(),

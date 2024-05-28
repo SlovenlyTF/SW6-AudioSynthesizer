@@ -8,6 +8,8 @@ import 'package:flutter_app/utilities/file_system.dart';
 import 'package:flutter_app/utilities/notifications.dart';
 import 'package:flutter_app/states/audio_saved_state.dart';
 
+const SERVER_IP = String.fromEnvironment('SERVER_IP', defaultValue: '10.0.2.2:5000');
+
 class GenerationState extends ChangeNotifier {
 
   GenerationState() {
@@ -83,7 +85,7 @@ class GenerationState extends ChangeNotifier {
 
   Future<String> sendRecording(OperationLabel operation) async {
     // Define paths
-    var url = Uri.http('10.0.2.2:5000', 'api/${operation.endpoint}');
+    var url = Uri.http(SERVER_IP, 'api/${operation.endpoint}');
     String filePath = await getTempRecordingPath();
 
     // Prepare request
@@ -93,7 +95,19 @@ class GenerationState extends ChangeNotifier {
     dio.options.connectTimeout = const Duration(seconds: 20);
     FormData formData = FormData.fromMap({
       'audio': await MultipartFile.fromFile(filePath, filename: 'test.wav'),
+      ...operation.parameters ?? {},
     });
+
+    print("ENDPOINT:");
+    print(url.toString());
+
+    print("PARAMTERS:");
+    print({
+      'audio': await MultipartFile.fromFile(filePath, filename: 'test.wav'),
+      ...operation.parameters ?? {},
+    });
+
+    showDebugToast('Sending audio to server...', Colors.cyan[300]);
 
     // Send request
     Response response;
@@ -109,6 +123,8 @@ class GenerationState extends ChangeNotifier {
       print('Sound synthesis failed with status: ${response.statusCode}');
       return '';
     }
+
+    showDebugToast('Generation done!', Colors.blue);
 
     return response.data['data']['resultUrl'];
   }
