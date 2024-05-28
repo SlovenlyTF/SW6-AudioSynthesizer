@@ -1,8 +1,7 @@
-
 /AI/training_images_music
 /AI/training_images_hum
-/AI/data
-/AI/model
+/AI/data/*
+/AI/model/*
 /Autoencoder/model
 /Autoencoder/data
 /Autoencoder/environment setup

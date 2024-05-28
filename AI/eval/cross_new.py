@@ -1,3 +1,5 @@
+#Fully made with chatgpt 3.5
+
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.io.wavfile as wav
