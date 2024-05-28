@@ -3,3 +3,7 @@
 /AI/training_images_hum
 /AI/data
 /AI/model
+/Autoencoder/model
+/Autoencoder/data
+/Autoencoder/environment setup
+/Autoencoder/test
