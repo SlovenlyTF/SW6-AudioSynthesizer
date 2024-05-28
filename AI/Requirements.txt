@@ -1,0 +1,12 @@
+librosa
+numba
+matplotlib
+scipy
+tensorflow
+protobuf
+inquirer
+torch
+pillow
+tqdm
+albumentations
+torchvision

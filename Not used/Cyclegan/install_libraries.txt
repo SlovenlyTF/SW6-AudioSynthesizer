@@ -1,0 +1,13 @@
+pip install librosa
+pip install numba
+pip install matplotlib
+pip install scipy
+pip install tensorflow
+pip install protobuf
+pip install inquirer
+pip install torch
+pip install pillow
+pip install tqdm
+pip install albumentations
+pip install torchvision
+conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia

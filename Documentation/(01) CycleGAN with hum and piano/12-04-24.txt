@@ -1,0 +1,4 @@
+12/04-2024
+
+Trained on only 5 epoch with only 2k of 30k+ and 20k+ segments for hum and piano, respectively.
+(Missing ram error)

@@ -1,0 +1,6 @@
+Late March.
+
+
+Different attemps with Jinglebells or hum/beepboop data.
+Trained for a few (5-10) or a lot of epoch (20+).
+None gave good results
