@@ -107,6 +107,8 @@ class GenerationState extends ChangeNotifier {
       ...operation.parameters ?? {},
     });
 
+    showDebugToast('Sending audio to server...', Colors.cyan[300]);
+
     // Send request
     Response response;
     try {
@@ -121,6 +123,8 @@ class GenerationState extends ChangeNotifier {
       print('Sound synthesis failed with status: ${response.statusCode}');
       return '';
     }
+
+    showDebugToast('Generation done!', Colors.blue);
 
     return response.data['data']['resultUrl'];
   }
