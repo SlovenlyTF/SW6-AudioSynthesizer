@@ -19,7 +19,6 @@ The implementation consists of three parts; the app (frontend), the webserver (b
 ## AI
 In order to perform timbre transfer, we sought to implement a machine learning model.
 We tried an array of different approaches and models and lastly implemented a CycleGAN model.
-Sadly this model never received a proper amount of training due to lack of time and hardware.
 
 You can listen to the outputs of our models on the project's [GitHub pages](https://slovenlytf.github.io/SW6-AudioSynthesizer/).
 
